@@ -7,6 +7,7 @@ from typing import Optional, List, Any, Dict, Union
 from fastapi import APIRouter, Depends, Query, Path,  Form, File, UploadFile, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from .core import  deps, schema, crud, tables
+from .services import cognito
 
 router = APIRouter()
 
@@ -24,6 +25,10 @@ async def login():
     """
     Initiates a user authetication flow
     """
+    ## implemenation links:
+    ##   - https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-authentication-flow.html#amazon-cognito-user-pools-server-side-authentication-flow
+    ##   - https://github.com/boto/boto3/issues/2745#issuecomment-773021989
+    res, err = cognito.initiate_auth('jimmy@omicmd.com')
     return None
 
 @router.get("/verify", tags=["Auth"])

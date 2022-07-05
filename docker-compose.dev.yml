@@ -14,6 +14,7 @@ services:
       - "9007:5000"
     volumes:
       - ./api:/app
+      - $HOME/.aws/credentials:/root/.aws/credentials:ro
     env_file:
       - .env
       - .env.dev.db
