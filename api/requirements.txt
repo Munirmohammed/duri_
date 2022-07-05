@@ -1,0 +1,16 @@
+# app
+fastapi>=0.78.0
+#mangum
+aiofiles
+# db
+psycopg2-binary
+SQLAlchemy
+#databases[postgresql]
+# file requests
+python-multipart
+# aws
+boto3
+#authetication/authorization
+pyjwt[crypto]
+## utils
+stringcase

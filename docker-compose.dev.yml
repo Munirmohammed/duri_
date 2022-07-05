@@ -1,0 +1,70 @@
+version: '3.8'
+
+## Notes
+##  - restart-policy : https://docs.docker.com/config/containers/start-containers-automatically/
+
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    privileged: yes
+    command: "./dev_start.sh"
+    ports:
+      - "9007:5000"
+    volumes:
+      - ./api:/app
+    env_file:
+      - .env
+      - .env.dev.db
+    depends_on:
+      - db
+    networks:
+      - db
+      - intranet
+
+  db:
+    image: postgres:12-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+      PGDATA: /data/postgres
+    env_file:
+      - .env.dev.db
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@omic.ai}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    env_file:
+      - .env.db
+    volumes:
+      - pgadmin:/root/.pgadmin
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    depends_on:
+      - db
+    networks:
+      - db
+    logging:
+      driver: none
+
+networks:
+  db: {}
+  intranet: {}
+
+volumes:
+  postgres:
+  pgadmin:

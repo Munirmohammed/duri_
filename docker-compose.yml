@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    #command: "./dev_start.sh"
+    restart: on-failure
+    privileged: yes
+    ports:
+      - "9007:5000"
+    volumes:
+      - ./api:/app
+      - $HOME/.aws/credentials:/root/.aws/credentials:ro
+    env_file:
+      - .env
+      - .env.db
+    depends_on:
+      - rabbitmq
+    networks:
+      - intranet
+
+  
+  rabbitmq:
+    image: "rabbitmq:latest"
+    restart: on-failure
+    networks:
+      - intranet
+
+networks:
+  intranet: {}
