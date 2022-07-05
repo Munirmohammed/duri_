@@ -16,15 +16,6 @@ services:
     env_file:
       - .env
       - .env.db
-    depends_on:
-      - rabbitmq
-    networks:
-      - intranet
-
-  
-  rabbitmq:
-    image: "rabbitmq:latest"
-    restart: on-failure
     networks:
       - intranet
 

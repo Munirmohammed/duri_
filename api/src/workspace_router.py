@@ -10,11 +10,18 @@ from .core import  deps, schema, crud, tables
 
 router = APIRouter()
 
-## Basic Routes
+## Workspaces management Routes
 
-@router.get("/service-info", response_model=schema.ServiceInfo, tags=["discovery"])
-async def service_info():
+@router.get("/workspace", tags=["Workspace"])
+async def list_workspace():
     """
-    Show information about this service.
+    List all available workspaces
     """
-    return schema.service_info_response
+    return None
+
+@router.post("/workspace", tags=["Workspace"])
+async def create_workspace():
+    """
+    Creates a new workspace
+    """
+    return None
