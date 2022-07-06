@@ -9,7 +9,7 @@ services:
     restart: on-failure
     privileged: yes
     ports:
-      - "9007:5000"
+      - "9041:5000"
     volumes:
       - ./api:/app
       - $HOME/.aws/credentials:/root/.aws/credentials:ro

@@ -7,3 +7,12 @@ from . import schema, tables
 from .crud_base import CRUDBase
 
 
+class User(CRUDBase):
+    pass
+
+class Workspace(CRUDBase):
+    def filter_in(self):
+        pass
+
+class Team(CRUDBase):
+    pass

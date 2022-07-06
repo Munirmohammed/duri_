@@ -1,10 +1,13 @@
 #from mangum import Mangum
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from starlette.responses import RedirectResponse
+from sqlalchemy.orm import Session
+from .core import  deps, migrate
 from .core.config import settings
 from .routes import router as api_router
 from .auth_router import router as auth_router
 from .workspace_router import router as workspace_router
+
 
 app = FastAPI(
     title=settings.api_name,
@@ -13,8 +16,10 @@ app = FastAPI(
 )
 
 @app.on_event("startup")
-async def startup():
+def startup():
     print('startup')
+    #migrate.migrate_workspaces() ## NOTE: activate this function when deploying
+    
 
 @app.on_event("shutdown")
 async def shutdown():

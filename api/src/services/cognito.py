@@ -6,7 +6,7 @@ import base64
 import json
 from src.core.config import settings
 
-boto3.set_stream_logger('')
+#boto3.set_stream_logger('')
 
 USER_POOL_REGION = settings.user_pool_region
 USER_POOL_ID = settings.user_pool_id
@@ -128,7 +128,9 @@ def create_group(name, description):
 
         Groups map to workspaces in this api
 
-        Ref: https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_CreateGroup.html
+        Ref: 
+        - https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_CreateGroup.html
+        - https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-user-groups.html?icmpid=docs_cognito_console_help_panel
         
     """
     client = boto3.client('cognito-idp', region_name=USER_POOL_REGION)
@@ -145,17 +147,29 @@ def create_group(name, description):
 def list_groups():
     """ 
         List all groups of a cognito-pool. (ListGroups) 
-
         Groups map to workspaces in this api
-
         Ref: https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_ListGroups.html
         
     """
     client = boto3.client('cognito-idp', region_name=USER_POOL_REGION)
     try:
-        resp = client.list_groups(
-                    UserPoolId = USER_POOL_ID,
-                )
+        resp = client.list_groups(UserPoolId = USER_POOL_ID,)
+    except Exception as e:
+        return None, e.__str__()
+    return resp, None
+
+def get_group(name: str):
+    """ 
+        Get group by name of a cognito-pool. (GetGroup) 
+        Groups map to workspaces in this api
+        Ref: https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_GetGroup.html
+        
+    """
+    client = boto3.client('cognito-idp', region_name=USER_POOL_REGION)
+    try:
+        resp = client.get_group(UserPoolId = USER_POOL_ID, GroupName=name)
+    except client.exceptions.ResourceNotFoundException:
+        return None, None
     except Exception as e:
         return None, e.__str__()
     return resp, None

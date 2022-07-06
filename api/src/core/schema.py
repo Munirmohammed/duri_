@@ -75,6 +75,30 @@ service_info_response = {
     "version": "2.0.0"
 }
 
+class Workspace(BaseModel):
+    id: Union[UUID4, str] = Field(..., description="id of the workspace")
+    name: str = Field(..., description="name of the workspace")
+    active: bool = Field(..., description="if the workspace is active or disabled")
+    description: Optional[str] = Field(None, description="description of the workspace")
+    avatar: Optional[str] = Field(None, description="link to the workspace logo image")
+    tags: Optional[List[str]] = Field(None, description="tag lebels")
+    ui_customization: Optional[Dict[str, Any]] = Field(None, description="an object of ui customizable items for ui ie. the object would have entry `background_image` for background image of the cards")
+    created_at: Optional[datetime] = Field(None, description="the actual creation date")
+    updated_at: Optional[datetime] = Field(None, description="last update date")
+    class Config:
+        orm_mode = True
+
+class Team(BaseModel):
+    id: Union[UUID4, str] = Field(None, description="id of the workspace")
+    name: str = Field(..., description="name of the workspace")
+    description: Optional[str] = Field(None, description="description of the workspace")
+    avatar: Optional[str] = Field(None, description="link to the workspace logo image")
+    tags: Optional[List[str]] = Field(None, description="tag lebels")
+    ui_customization: Optional[Dict[str, Any]] = Field(None, description="an object of ui customizable items for ui ie. the object would have entry `background_image` for background image of the cards")
+    created_at: Optional[datetime] = Field(None, description="the actual creation date")
+    updated_at: Optional[datetime] = Field(None, description="last update date")
+    class Config:
+        orm_mode = True
 
 class PassportVisaToken(BaseModel):
     """

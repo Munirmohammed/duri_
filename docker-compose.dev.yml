@@ -11,7 +11,7 @@ services:
     privileged: yes
     command: "./dev_start.sh"
     ports:
-      - "9007:5000"
+      - "9041:5000"
     volumes:
       - ./api:/app
       - $HOME/.aws/credentials:/root/.aws/credentials:ro
