@@ -66,9 +66,9 @@ async def verify(
     print(res, err)
     if err :
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail='error verifying code')
-    id_token = res['AuthenticationResult']['IdToken']
+    cognito_id_token = res['AuthenticationResult']['IdToken']
     refresh_token = res['AuthenticationResult']['RefreshToken']
-    claims, err = jwt.decode_cognito_token(id_token)
+    claims, err = jwt.decode_cognito_token(cognito_id_token)
     if err :
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail='error decoding token')
     expires_delta = settings.passport_token_expire_mins
@@ -81,9 +81,9 @@ async def verify(
         iat = now,
         exp = expire,
     )
-    token = jwt.encode_passport_token(data.dict())
+    id_token = jwt.encode_passport_token(data.dict())
     resp = {
-        'access_token': token,
+        'id_token': id_token,
         'token_type': 'bearer',
         'refresh_token': refresh_token,
     }
