@@ -1,3 +1,4 @@
+from pydoc import describe
 from fastapi import Form, Depends
 from pydantic import validator, BaseModel, Field, Json, UUID4
 from typing import Optional, List, Type, NewType, Any, Dict, Union
@@ -5,11 +6,11 @@ from enum import Enum
 from datetime import datetime
 from .config import settings
 
-class Organization(BaseModel):
+class Ga4ghOrganization(BaseModel):
     name: str
     url: str
 
-class InfoOrgType(BaseModel):
+class Ga4ghServiceType(BaseModel):
     group: str
     artifact: str
     version: str
@@ -17,9 +18,9 @@ class InfoOrgType(BaseModel):
 class ServiceInfo(BaseModel):
     id: str
     name: str
-    type: InfoOrgType
+    type: Ga4ghServiceType
     description: str
-    organization: Organization
+    organization: Ga4ghOrganization
     contactUrl: str
     documentationUrl: str
     environment: str
@@ -73,3 +74,17 @@ service_info_response = {
     "environment": "production",
     "version": "2.0.0"
 }
+
+
+class PassportVisaToken(BaseModel):
+    """
+    see https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md
+    """
+    iss: str = Field(..., description='the issuer of this token')
+    sub: str = Field(..., description='the user-id represented by this token')
+    email: str = Field(..., description='the user email address')
+    iat: int = Field(..., description='date-time when token was issued')
+    exp: int = Field(..., description='date-time for token expiration')
+    ga4gh_visa_v1: Optional[List[dict]] = Field(None, description='an list map of Passport Claims see https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md#passport-claim-format')
+    
+    

@@ -12,5 +12,6 @@ python-multipart
 boto3
 #authetication/authorization
 pyjwt[crypto]
+#python-jose[cryptography]
 ## utils
 stringcase
