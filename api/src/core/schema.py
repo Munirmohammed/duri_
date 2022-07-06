@@ -78,7 +78,9 @@ service_info_response = {
 
 class PassportVisaToken(BaseModel):
     """
-    see https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md
+    see : 
+        - https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md
+        - https://github.com/ga4gh/data-security/blob/master/AAI/AAIConnectProfile.md#ga4gh-jwt-format
     """
     iss: str = Field(..., description='the issuer of this token')
     sub: str = Field(..., description='the user-id represented by this token')

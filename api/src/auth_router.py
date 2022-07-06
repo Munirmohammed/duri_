@@ -16,14 +16,18 @@ router = APIRouter()
 ## User Authetication Routes
 
 @router.post("/register", tags=["Auth"])
-async def register():
+async def register(
+    username: str = Form(..., description="a username"),
+    email: str = Form(..., description="an email"),
+):
     """
     Registers a new user
     """
-    #token = 'eyJraWQiOiJBcnhnMGExY1czMWMzbjhpUVdhYzZ1NldRMkNSa2VxOFYrZzY1eWsrZ1NVPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI5MDA0ZmY1ZS0yMGJkLTQ5ZGMtYmEwMC0yZjRkYWZhYzk5NDAiLCJjb2duaXRvOmdyb3VwcyI6WyJvbWljLmFpIl0sImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtd2VzdC0yLmFtYXpvbmF3cy5jb21cL3VzLXdlc3QtMl9nWTRWQ1NYTGkiLCJjb2duaXRvOnVzZXJuYW1lIjoiamltbXlvbWljbWQuY29tIiwiZ2l2ZW5fbmFtZSI6ImppbW15Iiwib3JpZ2luX2p0aSI6ImYxNDQ5YTA3LTllNWUtNDM5OS1hNmNmLTczNjY3ZWRkODNjZSIsImF1ZCI6IjFvZmRqMTk3NDhyazl2MGFwNjBobnEzODVyIiwiZXZlbnRfaWQiOiI3MDBjNDgyZC03NGRjLTRmMzctOGQxZC01M2UyOGIwYTIyNWYiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTY1NzA1Mzg4MSwiZXhwIjoxNjU3MDU3NDgxLCJpYXQiOjE2NTcwNTM4ODEsImZhbWlseV9uYW1lIjoiY2xpZmYiLCJqdGkiOiJmM2ZhMzg1OC1hN2EyLTQ1ZWItOTE5MS03MDlkYzJjYmI2NTYiLCJlbWFpbCI6ImppbW15QG9taWNtZC5jb20ifQ.HlyGVOe55QvMlha8t7jF1vi8Djsn4fZYnNqaPg2-xVEo8g7qvUCyl4GvaEO-q-oa_ojU7m2Phea5yYHzr-g8VcODIpkyW6cJ43FqAInH67_nL_X3JmxfSQeaF05imVrPoUqbJ854yypLC7fgiku5LsZmOiovbj_HYqBJKE-E3XBBHL5brotd1vfHm-BwwvO26toQ32p-Gu3T-f9yWZvFXyHtdFUYjty0uuoN6CGVSsf4SMKFEASxOrYsz--3A1cLB61dtzny-TsyPVE_4XC0HScP8dT93cqqA9b93TKtMIy0voNWqqb27bkltkjw66n0xTH6-upJSCGwXlvvMq_HaQ'
-    #res, err = jwt.decode_cognito_token(token)
+    res, err = cognito.create_user(username, email)
     #print(res, err)
-    return None
+    if err :
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail='registration error')
+    return res
 
 @router.post("/login", tags=["Auth"])
 async def login(
@@ -38,6 +42,8 @@ async def login(
     ##   - https://github.com/boto/boto3/issues/2745#issuecomment-773021989
     res, err = cognito.initiate_auth(username)
     print(res, err)
+    if err :
+        raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail='signin error')
     username = res['ChallengeParameters']['USERNAME']
     session = res['Session']
     resp = {
@@ -76,8 +82,10 @@ async def verify(
         exp = expire,
     )
     token = jwt.encode_passport_token(data.dict())
-    return {
+    resp = {
         'access_token': token,
+        'token_type': 'bearer',
         'refresh_token': refresh_token,
     }
+    return resp
 

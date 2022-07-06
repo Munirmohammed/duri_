@@ -23,7 +23,7 @@ def get_secret_hash(username):
 
 def initiate_auth(username:str, callback_url: str = 'http://nucleus.omic.ai:9001'):
     """ 
-        Initiate cognito Admin AdminInitiateAuth
+        Initiate Login flow. (AdminInitiateAuth)
 
         Ref: https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_AdminInitiateAuth.html 
         TODO:
@@ -67,7 +67,7 @@ def initiate_auth(username:str, callback_url: str = 'http://nucleus.omic.ai:9001
 
 def respond_auth_challenge(username, code, session):
     """ 
-        respond to congito custom-auth challenge, uses => AdminRespondToAuthChallenge
+        respond to congito custom-auth challenge. (AdminRespondToAuthChallenge)
 
         Ref: https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_AdminInitiateAuth.html 
         TODO:
@@ -95,3 +95,30 @@ def respond_auth_challenge(username, code, session):
     except Exception as e:
         return None, e.__str__()
     return resp, None
+
+def create_user(username, email):
+    """ 
+        Register a new user. (AdminCreateUser) 
+
+        Ref: https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_AdminCreateUser.html
+        
+    """
+    client = boto3.client('cognito-idp', region_name=USER_POOL_REGION)
+    try:
+        resp = client.admin_respond_to_auth_challenge(
+                    UserPoolId = USER_POOL_ID,
+                    #ClientId = CLIENT_ID,
+                    Username = username,
+                    UserAttributes = [
+                        { 'Name': 'email', 'Value': email},
+                        #{ 'Name': 'phone_number', 'Value': phone_number},
+                    ],
+                    DesiredDeliveryMediums = ['email'],
+                    ClientMetadata = {
+                        'string': 'string'
+                    }
+                )
+    except Exception as e:
+        return None, e.__str__()
+    return resp, None
+
