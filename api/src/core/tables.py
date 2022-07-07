@@ -57,5 +57,6 @@ class UserWorkspace(Base):
     __tablename__ = 'user_workspace'
     user_id = Column(UUID(as_uuid=True),  ForeignKey('user.id'), primary_key=True, nullable=False)
     workspace_id = Column(UUID(as_uuid=True),  ForeignKey('workspace.id'), primary_key=True, nullable=False)
+    team_id = Column(UUID(as_uuid=True),  ForeignKey('team.id'), nullable=True)
     membership = Column(String, nullable=True, default='user')
     created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)

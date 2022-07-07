@@ -18,6 +18,7 @@ router = APIRouter()
 async def add_user_to_workspace(
     user: str = Form(..., description="the user-id"),
     workspace: str = Form(..., description="the workspace name"),
+    team: Optional[str] = Form(None, description="a team name for a team within the workspace"),
     db: Session = Depends(deps.get_db),
 ):
     """
@@ -25,6 +26,7 @@ async def add_user_to_workspace(
     """
     ## TODO: - check user if pre-exists in the cognito group
     ##       - add user to cognito group
+    ##       - add user to team too
     crud_workspace = crud.Workspace(tables.Workspace, db)
     crud_user = crud.User(tables.User, db)
     crud_user_workspace = crud.UserWorkspace(tables.UserWorkspace, db)
@@ -64,4 +66,3 @@ async def add_user_to_workspace(
     user_workspace = crud_user_workspace.create(db_obj)
     #print(user_workspace)
     return db_obj
-    

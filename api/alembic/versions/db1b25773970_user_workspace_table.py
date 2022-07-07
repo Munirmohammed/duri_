@@ -64,20 +64,14 @@ def upgrade():
         "user_workspace",
         sa.Column("user_id", UUID(as_uuid=True),  sa.ForeignKey('user.id'), primary_key=True, nullable=False), # *(required)
         sa.Column("workspace_id", UUID(as_uuid=True),  sa.ForeignKey('workspace.id'), primary_key=True, nullable=False), # *(required)
+        sa.Column("team_id", UUID(as_uuid=True),  sa.ForeignKey('team.id'), nullable=True),
         sa.Column("membership", sa.String(), nullable=True, server_default="user", comment="membership type to that group, ie user | admin"), # user | admin
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=func.now()),
     )
-    op.create_table(
-        "user_team",
-        sa.Column("user_id", UUID(as_uuid=True),  sa.ForeignKey('user.id'), primary_key=True, nullable=False), # *(required)
-        sa.Column("team_id", UUID(as_uuid=True),  sa.ForeignKey('team.id'), primary_key=True, nullable=False), # *(required)
-        sa.Column("membership", sa.String(), nullable=True, server_default="user", comment="membership type to that group, ie user | admin"), # user | admin
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=func.now()),
-    )
+    
 
 
 def downgrade():
-    op.drop_table("user_team")
     op.drop_table("user_workspace")
     op.drop_table("team")
     op.drop_table("workspace")

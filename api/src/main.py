@@ -19,7 +19,7 @@ app = FastAPI(
 @app.on_event("startup")
 def startup():
     print('startup')
-    #migrate.migrate_workspaces() ## NOTE: activate this function when deploying
+    migrate.migrate_workspaces() ## NOTE: activate this function when deploying
     
 
 @app.on_event("shutdown")
