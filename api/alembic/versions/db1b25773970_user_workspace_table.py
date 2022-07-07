@@ -27,6 +27,7 @@ def upgrade():
         "user",
         sa.Column("id", UUID(as_uuid=True), primary_key=True, unique=True, nullable=False), # *(required) , cognito user-id
         sa.Column("email", sa.String(), unique=True, nullable=False), # *(required)
+        sa.Column("username", sa.String(), unique=True, nullable=False), # *(required)
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
     )
@@ -64,12 +65,14 @@ def upgrade():
         sa.Column("user_id", UUID(as_uuid=True),  sa.ForeignKey('user.id'), primary_key=True, nullable=False), # *(required)
         sa.Column("workspace_id", UUID(as_uuid=True),  sa.ForeignKey('workspace.id'), primary_key=True, nullable=False), # *(required)
         sa.Column("membership", sa.String(), nullable=True, server_default="user", comment="membership type to that group, ie user | admin"), # user | admin
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=func.now()),
     )
     op.create_table(
         "user_team",
         sa.Column("user_id", UUID(as_uuid=True),  sa.ForeignKey('user.id'), primary_key=True, nullable=False), # *(required)
         sa.Column("team_id", UUID(as_uuid=True),  sa.ForeignKey('team.id'), primary_key=True, nullable=False), # *(required)
         sa.Column("membership", sa.String(), nullable=True, server_default="user", comment="membership type to that group, ie user | admin"), # user | admin
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=func.now()),
     )
 
 

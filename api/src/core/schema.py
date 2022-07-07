@@ -1,4 +1,3 @@
-from pydoc import describe
 from fastapi import Form, Depends
 from pydantic import validator, BaseModel, Field, Json, UUID4
 from typing import Optional, List, Type, NewType, Any, Dict, Union
@@ -75,7 +74,7 @@ service_info_response = {
     "version": "2.0.0"
 }
 
-class Workspace(BaseModel):
+class WorkspaceBase(BaseModel):
     id: Union[UUID4, str] = Field(..., description="id of the workspace")
     name: str = Field(..., description="name of the workspace")
     active: bool = Field(..., description="if the workspace is active or disabled")
@@ -83,20 +82,49 @@ class Workspace(BaseModel):
     avatar: Optional[str] = Field(None, description="link to the workspace logo image")
     tags: Optional[List[str]] = Field(None, description="tag lebels")
     ui_customization: Optional[Dict[str, Any]] = Field(None, description="an object of ui customizable items for ui ie. the object would have entry `background_image` for background image of the cards")
+    #created_at: Optional[datetime] = Field(None, description="the actual creation date")
+    #updated_at: Optional[datetime] = Field(None, description="last update date")
+    class Config:
+        orm_mode = True
+
+class TeamBase(BaseModel):
+    id: Union[UUID4, str] = Field(..., description="id of the team")
+    name: str = Field(..., description="name of the team")
+    active: bool = Field(..., description="if the team is active or disabled")
+    description: Optional[str] = Field(None, description="description of the team")
+    avatar: Optional[str] = Field(None, description="link to the team logo image")
+    tags: Optional[List[str]] = Field(None, description="tag lebels")
+    ui_customization: Optional[Dict[str, Any]] = Field(None, description="an object of ui customizable items for ui ie. the object would have entry `background_image` for background image of the cards")
     created_at: Optional[datetime] = Field(None, description="the actual creation date")
     updated_at: Optional[datetime] = Field(None, description="last update date")
     class Config:
         orm_mode = True
 
-class Team(BaseModel):
-    id: Union[UUID4, str] = Field(None, description="id of the workspace")
-    name: str = Field(..., description="name of the workspace")
-    description: Optional[str] = Field(None, description="description of the workspace")
-    avatar: Optional[str] = Field(None, description="link to the workspace logo image")
+class TeamInsert(BaseModel):
+    name: str = Field(..., description="name of the team")
+    workspace_id: Union[UUID4, str] = Field(..., description="workspace id")
+    creator_id: Union[UUID4, str] = Field(..., description="the owner user-id")
+    active: bool = Field(..., description="if the team is active or disabled")
+    description: Optional[str] = Field(None, description="description of the team")
+    avatar: Optional[str] = Field(None, description="link to the team logo image")
     tags: Optional[List[str]] = Field(None, description="tag lebels")
     ui_customization: Optional[Dict[str, Any]] = Field(None, description="an object of ui customizable items for ui ie. the object would have entry `background_image` for background image of the cards")
+    class Config:
+        orm_mode = True
+
+class WorkspaceMini(WorkspaceBase):
     created_at: Optional[datetime] = Field(None, description="the actual creation date")
     updated_at: Optional[datetime] = Field(None, description="last update date")
+
+class Workspace(WorkspaceBase):
+    teams : List[TeamBase] = Field(None, description="this workspace teams")
+    created_at: Optional[datetime] = Field(None, description="the actual creation date")
+    updated_at: Optional[datetime] = Field(None, description="last update date")
+
+class UserWorkspace(WorkspaceBase):
+    user : str = Field(None, description="the user_id")
+    workspace: str = Field(None, description="the workspace name")
+    created_at: Optional[datetime] = Field(None, description="the creation date")
     class Config:
         orm_mode = True
 
@@ -112,6 +140,6 @@ class PassportVisaToken(BaseModel):
     email: str = Field(..., description='the user email address')
     iat: int = Field(..., description='date-time when token was issued')
     exp: int = Field(..., description='date-time for token expiration')
-    ga4gh_visa_v1: Optional[List[dict]] = Field(None, description='an list map of Passport Claims see https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md#passport-claim-format')
+    #ga4gh_visa_v1: Optional[List[Dict[str, Any]]] = Field(None, description='an list map of Passport Claims see https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md#passport-claim-format')
     
     

@@ -7,6 +7,7 @@ from .core.config import settings
 from .routes import router as api_router
 from .auth_router import router as auth_router
 from .workspace_router import router as workspace_router
+from .user_router import router as user_router
 
 
 app = FastAPI(
@@ -32,5 +33,6 @@ def main():
 app.include_router(api_router) # prefix=settings.API_V1_STR
 app.include_router(auth_router)
 app.include_router(workspace_router)
+app.include_router(user_router)
 
 handler = app

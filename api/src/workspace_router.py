@@ -15,7 +15,7 @@ router = APIRouter()
 ## Workspaces management Routes
 ##  - Workspaces map to cognito-groups
 
-@router.get("/workspace", response_model=List[schema.Workspace], tags=["Workspace"])
+@router.get("/workspace", response_model=List[schema.WorkspaceMini], tags=["Workspace"])
 async def list_workspace(
     db: Session = Depends(deps.get_db),
 ):
@@ -60,3 +60,47 @@ async def create_workspace(
         workspace = crud_workspace.create(db_obj)
     
     return workspace
+
+@router.get("/workspace/{name}", response_model=schema.Workspace, tags=["Workspace"])
+async def get_workspace(
+    name: str = Path(..., description="workspace name"),
+    db: Session = Depends(deps.get_db),
+):
+    """
+    Get a Workspace 
+    """
+    ## TODO: check group exist in cognito groups
+    crud_workspace = crud.Workspace(tables.Workspace, db)
+    workspace = crud_workspace.get_by_name(name)
+    return workspace
+
+@router.post("/team", response_model=schema.TeamBase, tags=["Workspace"])
+async def create_team(
+    workspace: str = Form(..., description="the workspace name"),
+    name: str = Form(..., description="the team name"),
+    description: str = Form(..., description="the team description"),
+    db: Session = Depends(deps.get_db),
+):
+    """
+    Create Team
+    """
+    ## TODO: check group exist in cognito groups
+    crud_workspace = crud.Workspace(tables.Workspace, db)
+    crud_team = crud.Team(tables.Team, db)
+    workspace_obj = crud_workspace.get_by_name(workspace)
+    if not workspace_obj:
+        raise HTTPException(status_code=400, detail="workspace not exists")
+    workspace_id = workspace_obj.id
+    team = crud_team.filter_by(workspace_id=workspace_id, name=name, limit=1)
+    if team:
+        raise HTTPException(status_code=400, detail="team already exists")
+    team_obj = schema.TeamInsert(
+        name=name,
+        workspace_id=workspace_id,
+        description=description,
+        active=True,
+        creator_id='9004ff5e-20bd-49dc-ba00-2f4dafac9940', ## TODO: replace with user-sub from token , the caller of this endpoint 
+    )
+    team = crud_team.create(team_obj.dict(exclude_unset=True))
+    
+    return team

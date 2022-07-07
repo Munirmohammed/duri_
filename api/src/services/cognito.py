@@ -174,3 +174,23 @@ def get_group(name: str):
         return None, e.__str__()
     return resp, None
 
+def list_users(filter: str = '', attributes: list = []):
+    """ 
+        List all groups of a cognito-pool. (ListUsers) 
+        Ref: 
+            - https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_ListUsers.html
+            - https://docs.aws.amazon.com/cognito/latest/developerguide/how-to-manage-user-accounts.html#cognito-user-pools-searching-for-users-listusers-api-examples
+        
+    """
+    print(filter)
+    client = boto3.client('cognito-idp', region_name=USER_POOL_REGION)
+    try:
+        resp = client.list_users(
+            UserPoolId = USER_POOL_ID,
+            AttributesToGet=attributes, # ie ['email', 'sub', 'username']
+            Filter=filter,
+            #Limit=limit
+        )
+    except Exception as e:
+        return None, e.__str__()
+    return resp, None
