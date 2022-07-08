@@ -24,9 +24,8 @@ async def add_user_to_workspace(
     """
     Add user to a workspace
     """
-    ## TODO: - check user if pre-exists in the cognito group
-    ##       - add user to cognito group
-    ##       - add user to team too
+    ## TODO: 
+    ##  - add user to team too
     crud_workspace = crud.Workspace(tables.Workspace, db)
     crud_user = crud.User(tables.User, db)
     crud_user_workspace = crud.UserWorkspace(tables.UserWorkspace, db)
@@ -55,7 +54,18 @@ async def add_user_to_workspace(
         }
         user_obj = crud_user.create(db_obj)
     user_id = user_obj.id
+    username = user_obj.username
     workspace_id = workspace_obj.id
+    workspace_name = workspace_obj.name
+    res, err = cognito.list_user_groups(username)
+    if err:
+        raise HTTPException(status_code=400, detail="server error")
+    user_groups = [x['GroupName'] for x in res['Groups']]
+    if workspace_name not in user_groups:
+        res, err = cognito.add_user_to_group(username, workspace_name)
+        print(res, err)
+        if err:
+            raise HTTPException(status_code=400, detail="server error")
     user_workspace = crud_user_workspace.filter_by(user_id, workspace_id, limit=1)
     if user_workspace:
         raise HTTPException(status_code=400, detail="user exists in this workspace")

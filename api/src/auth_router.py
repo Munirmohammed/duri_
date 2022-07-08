@@ -31,7 +31,7 @@ async def register(
 
 @router.post("/login", tags=["Auth"])
 async def login(
-    username: str = Form(..., description="username or email"), #  ie, jimmy@omicmd.com
+    username: str = Form(..., description="email or username"), #  ie, jimmy@omicmd.com
     #callback_url: str = Form('http://nucleus.omic.ai:9001', description="the url that will be used in the verify email where verification code will be appended to."), # ie, http://nucleus.omic.ai:9001/
 ):
     """
@@ -54,6 +54,7 @@ async def login(
 
 @router.post("/verify", tags=["Auth"])
 async def verify(
+    db: Session = Depends(deps.get_db),
     username: str = Form(..., description="the actual username"), 
     code: str = Form(..., description="the verification code in the email"), 
     session: str = Form(..., description="the session response retrieved from login"), 
@@ -71,6 +72,58 @@ async def verify(
     claims, err = jwt.decode_cognito_token(cognito_id_token)
     if err :
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail='error decoding token')
+    crud_user = crud.User(tables.User, db)
+    crud_workspace = crud.Workspace(tables.Workspace, db)
+    crud_user_workspace = crud.UserWorkspace(tables.UserWorkspace, db)
+    username = claims['username']
+    user_id = claims['sub']
+    email = claims['email']
+    groups = claims.get('cognito:groups', [])
+    user = crud_user.get(user_id)
+    if not user:
+        attrs = ['email', 'sub']
+        res, err = cognito.list_users(f'sub = "{user_id}"', attrs)
+        cognito_user = res['Users'][0] if res and len(res['Users']) > 0 else None
+        if cognito_user:
+            #attr_dict = { cognito_user['Attributes'][i]['Name'] : cognito_user['Attributes'][i]['Value'] for i in range(0, len(cognito_user['Attributes']) ) } 
+            db_obj = {
+                'id': user_id ,
+                'email': email ,
+                'username': username ,
+                'created_at': cognito_user['UserCreateDate'] ,
+                'updated_at': cognito_user['UserLastModifiedDate'] ,
+            }
+            user = crud_user.create(db_obj)
+    
+    if  len(groups) == 0:
+        ## add user to default group/workspace.
+        cognito.add_user_to_group(username, settings.default_workspace)
+        groups = [settings.default_workspace]
+    ## sync cognito-user-groups with workspaces
+    for group in groups:
+        workspace = crud_workspace.get_by_name(group)
+        if not workspace:
+            res, err = cognito.get_group(group)
+            if res:
+                cog_group = res['Group']
+                db_obj = {
+                    'name': cog_group['GroupName'],
+                    'creator_id':'9004ff5e-20bd-49dc-ba00-2f4dafac9940', ## TODO: replace with user-sub from token , the caller of this endpoint 
+                    'description': cog_group['Description'],
+                    'created_at':cog_group['CreationDate'],
+                    'updated_at':cog_group['LastModifiedDate'],
+                }
+                workspace = crud_workspace.create(db_obj)
+        if not workspace:
+            continue
+        workspace_id = workspace.id
+        user_workspace = crud_user_workspace.filter_by(user_id, workspace_id, limit=1)
+        if not user_workspace:
+            db_obj = {
+                'user_id': user_id,
+                'workspace_id': workspace_id,
+            }
+            user_workspace = crud_user_workspace.create(db_obj)
     expires_delta = settings.passport_token_expire_mins
     now = datetime.utcnow()
     expire = now + timedelta(minutes=expires_delta)

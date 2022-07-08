@@ -8,7 +8,9 @@ from .crud_base import CRUDBase
 
 
 class User(CRUDBase):
-    pass
+    def get_by_username(self, username: str) -> tables.User:
+        db = self.db
+        return db.query(self.model).filter(self.model.username == username).first()
 
 class Workspace(CRUDBase):
     pass

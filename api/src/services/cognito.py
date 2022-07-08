@@ -158,7 +158,7 @@ def list_groups():
         return None, e.__str__()
     return resp, None
 
-def get_group(name: str):
+def get_group(group_name: str):
     """ 
         Get group by name of a cognito-pool. (GetGroup) 
         Groups map to workspaces in this api
@@ -167,12 +167,46 @@ def get_group(name: str):
     """
     client = boto3.client('cognito-idp', region_name=USER_POOL_REGION)
     try:
-        resp = client.get_group(UserPoolId = USER_POOL_ID, GroupName=name)
+        resp = client.get_group(UserPoolId = USER_POOL_ID, GroupName=group_name)
     except client.exceptions.ResourceNotFoundException:
         return None, None
     except Exception as e:
         return None, e.__str__()
     return resp, None
+
+def add_user_to_group(username: str, group_name: str):
+    """ 
+        Adds the specified user to the specified group of cognito-pool. (AdminAddUserToGroup) 
+        Ref: https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_AdminAddUserToGroup.html
+        
+    """
+    client = boto3.client('cognito-idp', region_name=USER_POOL_REGION)
+    try:
+        resp = client.admin_add_user_to_group(
+            UserPoolId = USER_POOL_ID, 
+            Username=username,
+            GroupName=group_name
+        )
+    except Exception as e:
+        return None, e.__str__()
+    return resp, None
+
+def list_user_groups(username: str):
+    """ 
+        list groups user belongs in. (AdminListGroupsForUser) 
+        Ref: https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_AdminListGroupsForUser.html
+        
+    """
+    client = boto3.client('cognito-idp', region_name=USER_POOL_REGION)
+    try:
+        resp = client.admin_list_groups_for_user(
+            UserPoolId = USER_POOL_ID, 
+            Username=username,
+        )
+    except Exception as e:
+        return None, e.__str__()
+    return resp, None
+
 
 def list_users(filter: str = '', attributes: list = []):
     """ 
@@ -182,7 +216,7 @@ def list_users(filter: str = '', attributes: list = []):
             - https://docs.aws.amazon.com/cognito/latest/developerguide/how-to-manage-user-accounts.html#cognito-user-pools-searching-for-users-listusers-api-examples
         
     """
-    print(filter)
+    print('list_users (filters)=>', filter)
     client = boto3.client('cognito-idp', region_name=USER_POOL_REGION)
     try:
         resp = client.list_users(
