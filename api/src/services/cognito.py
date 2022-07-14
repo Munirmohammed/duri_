@@ -97,6 +97,28 @@ def respond_auth_challenge(username, code, session):
         return None, e.__str__()
     return resp, None
 
+def update_user_attributes(username, attributes):
+    """ 
+        updates user attributes (AdminUpdateUserAttributes) 
+        Updates the specified user's attributes, including developer attributes, as an administrator. Works on any user.
+
+        For custom attributes, you must prepend the custom: prefix to the attribute name.
+
+        In addition to updating user attributes, this API can also be used to mark phone and email as verified.
+        Ref: https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_AdminUpdateUserAttributes.html
+        
+    """
+    client = boto3.client('cognito-idp', region_name=USER_POOL_REGION)
+    try:
+        resp = client.admin_update_user_attributes(
+                    UserPoolId = USER_POOL_ID,
+                    Username = username,
+                    UserAttributes= attributes,
+                )
+    except Exception as e:
+        return None, e.__str__()
+    return resp, None
+
 def set_user_password(username, password, permanent: bool =True):
     """ 
         Set user password a new user. (AdminSetUserPassword) 
@@ -131,6 +153,7 @@ def create_user(username, email, first_name, last_name):
                     Username = username,
                     UserAttributes = [
                         { 'Name': 'email', 'Value': email},
+                        { 'Name': 'email_verified', 'Value': 'true'},
                         { 'Name': 'given_name', 'Value': first_name},
                         { 'Name': 'family_name', 'Value': last_name},
                         #{ 'Name': 'phone_number', 'Value': phone_number},
