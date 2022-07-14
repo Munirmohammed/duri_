@@ -5,6 +5,7 @@ import hashlib
 import base64
 import json
 from src.core.config import settings
+from src import utils
 
 #boto3.set_stream_logger('')
 
@@ -96,7 +97,26 @@ def respond_auth_challenge(username, code, session):
         return None, e.__str__()
     return resp, None
 
-def create_user(username, email):
+def set_user_password(username, password, permanent: bool =True):
+    """ 
+        Set user password a new user. (AdminSetUserPassword) 
+
+        Ref: https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_AdminSetUserPassword.html
+        
+    """
+    client = boto3.client('cognito-idp', region_name=USER_POOL_REGION)
+    try:
+        resp = client.admin_set_user_password(
+                    UserPoolId = USER_POOL_ID,
+                    Username = username,
+                    Password= password,
+                    Permanent= permanent,
+                )
+    except Exception as e:
+        return None, e.__str__()
+    return resp, None
+
+def create_user(username, email, first_name, last_name):
     """ 
         Register a new user. (AdminCreateUser) 
 
@@ -105,19 +125,24 @@ def create_user(username, email):
     """
     client = boto3.client('cognito-idp', region_name=USER_POOL_REGION)
     try:
-        resp = client.admin_respond_to_auth_challenge(
+        resp = client.admin_create_user(
                     UserPoolId = USER_POOL_ID,
                     #ClientId = CLIENT_ID,
                     Username = username,
                     UserAttributes = [
                         { 'Name': 'email', 'Value': email},
+                        { 'Name': 'given_name', 'Value': first_name},
+                        { 'Name': 'family_name', 'Value': last_name},
                         #{ 'Name': 'phone_number', 'Value': phone_number},
                     ],
-                    DesiredDeliveryMediums = ['email'],
+                    DesiredDeliveryMediums = ['EMAIL'],
                     ClientMetadata = {
                         'string': 'string'
                     }
                 )
+        password = utils.id_generator(12)
+        r, e = set_user_password(username, password, True)
+        print(r, e)
     except Exception as e:
         return None, e.__str__()
     return resp, None

@@ -19,12 +19,15 @@ router = APIRouter()
 async def register(
     username: str = Form(..., description="a username"),
     email: str = Form(..., description="an email"),
+    first_name: str = Form(..., description="user first name"),
+    last_name: str = Form(..., description="user last name"),
+    bio: Optional[str] = Form(None, description="user last name"),
 ):
     """
     Registers a new user
     """
-    res, err = cognito.create_user(username, email)
-    #print(res, err)
+    res, err = cognito.create_user(username, email, first_name, last_name)
+    print(res, err)
     if err :
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail='registration error')
     return res
@@ -70,12 +73,13 @@ async def verify(
     cognito_id_token = res['AuthenticationResult']['IdToken']
     refresh_token = res['AuthenticationResult']['RefreshToken']
     claims, err = jwt.decode_cognito_token(cognito_id_token)
+    print('claims', claims)
     if err :
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail='error decoding token')
     crud_user = crud.User(tables.User, db)
     crud_workspace = crud.Workspace(tables.Workspace, db)
     crud_user_workspace = crud.UserWorkspace(tables.UserWorkspace, db)
-    username = claims['username']
+    username = claims['cognito:username']
     user_id = claims['sub']
     email = claims['email']
     groups = claims.get('cognito:groups', [])
@@ -127,18 +131,26 @@ async def verify(
     expires_delta = settings.passport_token_expire_mins
     now = datetime.utcnow()
     expire = now + timedelta(minutes=expires_delta)
+    print(expire)
     data = schema.PassportVisaToken(
         iss = 'omic:duri',
         sub = claims['sub'],
         email = claims['email'],
-        iat = now,
-        exp = expire,
+        iat = claims['iat'], #now,
+        exp = claims['exp'], # int(expire),
     )
     id_token = jwt.encode_passport_token(data.dict())
     resp = {
         'id_token': id_token,
         'token_type': 'bearer',
         'refresh_token': refresh_token,
+        'user_attributes': {
+            'sub': claims['sub'], 
+            'email': claims['email'], 
+            'username': username, 
+            #email_verified: '', 
+            #phone_number: ''
+        }
     }
     return resp
 
