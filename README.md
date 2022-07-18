@@ -12,3 +12,8 @@ see [google-doc](https://docs.google.com/document/d/1HfF6laHF8R3fR7tefsq93dGSD5F
 
 **Prod** - run `make run-d`
 
+## Documentation
+
+### Workspaces
+
+- only a workspace creator or a workspace member with `admin` membership can create a team or add a member under that workspace

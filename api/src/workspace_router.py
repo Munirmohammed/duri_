@@ -74,20 +74,20 @@ async def get_workspace(
     workspace = crud_workspace.get_by_name(name)
     return workspace
 
-@router.post("/team", response_model=schema.TeamBase, tags=["Workspace"])
+@router.post("/workspace/{workspace_name}/team", response_model=schema.TeamBase, tags=["Workspace"])
 async def create_team(
-    workspace: str = Form(..., description="the workspace name"),
+    workspace_name: str = Path(..., description="the workspace name"),
     name: str = Form(..., description="the team name"),
     description: str = Form(..., description="the team description"),
     db: Session = Depends(deps.get_db),
 ):
     """
-    Create Team
+    Create Team in a workspace
     """
     ## TODO: check group exist in cognito groups
     crud_workspace = crud.Workspace(tables.Workspace, db)
     crud_team = crud.Team(tables.Team, db)
-    workspace_obj = crud_workspace.get_by_name(workspace)
+    workspace_obj = crud_workspace.get_by_name(workspace_name)
     if not workspace_obj:
         raise HTTPException(status_code=400, detail="workspace not exists")
     workspace_id = workspace_obj.id
@@ -104,3 +104,27 @@ async def create_team(
     team = crud_team.create(team_obj.dict(exclude_unset=True))
     
     return team
+
+@router.get("/workspace/{workspace_name}/team/{team_name}/users", response_model=List[schema.UserWorkspace], tags=["Workspace"])
+async def get_team_users(
+    workspace_name: str = Path(..., description="the workspace name"),
+    team_name: str = Path(..., description="the team name"),
+    db: Session = Depends(deps.get_db),
+):
+    """
+    Get users of a workspace
+    """
+    crud_workspace = crud.Workspace(tables.Workspace, db)
+    crud_team = crud.Team(tables.Team, db)
+    crud_user_workspace = crud.UserWorkspace(tables.UserWorkspace, db)
+    workspace_obj = crud_workspace.get_by_name(workspace_name)
+    if not workspace_obj:
+        raise HTTPException(status_code=400, detail="workspace not exists")
+    workspace_id = workspace_obj.id
+    team = crud_team.filter_by(workspace_id=workspace_id, name=team_name, limit=1)
+    if not team:
+        raise HTTPException(status_code=400, detail="team not exists")
+    team_id = team.id
+    workspace_users = crud_user_workspace.filter_by(workspace_id=workspace_id, team_id=team_id)
+    print(workspace_users)
+    return workspace_users

@@ -154,3 +154,13 @@ async def verify(
     }
     return resp
 
+@router.post("/token/renew", tags=["Auth"])
+async def renew_token(
+    db: Session = Depends(deps.get_db), 
+):
+    """
+    renew a refresh token to get new  access_token
+    """
+    ## TODO:
+    ##   - user provides the cognito refresh-token , use it to renew cognito login session and return DURI id-token 
+    return None

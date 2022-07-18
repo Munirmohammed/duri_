@@ -18,16 +18,18 @@ router = APIRouter()
 async def add_user_to_workspace(
     user: str = Form(..., description="the user-id"),
     workspace: str = Form(..., description="the workspace name"),
-    team: Optional[str] = Form(None, description="a team name for a team within the workspace"),
+    team: str = Form(..., description="a team name for a team within the workspace"),
+    membership: str = Form('contributor', description="a the membership of the user in that workspace team. Only users with `admin` membership to a workspace can add members to that workspace."),
     db: Session = Depends(deps.get_db),
 ):
     """
-    Add user to a workspace
+    Add user to a workspace and team
     """
     ## TODO: 
     ##  - add user to team too
-    crud_workspace = crud.Workspace(tables.Workspace, db)
     crud_user = crud.User(tables.User, db)
+    crud_workspace = crud.Workspace(tables.Workspace, db)
+    crud_team = crud.Team(tables.Team, db)
     crud_user_workspace = crud.UserWorkspace(tables.UserWorkspace, db)
     workspace_obj = crud_workspace.get_by_name(workspace)
     if not workspace_obj:
@@ -66,13 +68,30 @@ async def add_user_to_workspace(
         print(res, err)
         if err:
             raise HTTPException(status_code=400, detail="server error")
-    user_workspace = crud_user_workspace.filter_by(user_id, workspace_id, limit=1)
+    team_obj = crud_team.filter_by(workspace_id=workspace_id, name=team, limit=1)
+    if not team_obj:
+        raise HTTPException(status_code=400, detail="team not exists")
+    team_id = team_obj.id
+    user_workspace = crud_user_workspace.filter_by(user_id, workspace_id, team_id=team_id, limit=1)
     if user_workspace:
         raise HTTPException(status_code=400, detail="user exists in this workspace")
     db_obj = {
-        'user_id': user_obj.id,
-        'workspace_id': workspace_obj.id,
+        'user_id': user_id,
+        'workspace_id': workspace_id,
+        'team_id': team_id,
+        'membership': membership,
     }
     user_workspace = crud_user_workspace.create(db_obj)
     #print(user_workspace)
     return db_obj
+
+@router.get("/user/workspace", tags=["User"])
+async def get_user_workspaces(
+    user: str = Form(..., description="the user-id"),
+    db: Session = Depends(deps.get_db),
+):
+    """
+    Get workspaces a user belongs to
+    """
+    ## TODO:
+    return None

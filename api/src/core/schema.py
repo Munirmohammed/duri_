@@ -121,12 +121,17 @@ class Workspace(WorkspaceBase):
     created_at: Optional[datetime] = Field(None, description="the actual creation date")
     updated_at: Optional[datetime] = Field(None, description="last update date")
 
-class UserWorkspace(WorkspaceBase):
-    user : str = Field(None, description="the user_id")
-    workspace: str = Field(None, description="the workspace name")
+class UserWorkspace(BaseModel):
+    user_id : Union[UUID4, str] = Field(None, description="the user_id")
+    workspace_id: Union[UUID4, str] = Field(None, description="the workspace id")
+    team_id: Union[UUID4, str] = Field(None, description="the team id")
+    membership: str = Field(None, description="the workspace membership")
     created_at: Optional[datetime] = Field(None, description="the creation date")
     class Config:
         orm_mode = True
+
+#class GetUserWorkspace(UserWorkspace):
+#    pass
 
 class PassportVisaToken(BaseModel):
     """
@@ -141,5 +146,3 @@ class PassportVisaToken(BaseModel):
     iat: int = Field(..., description='date-time when token was issued')
     exp: int = Field(..., description='date-time for token expiration')
     #ga4gh_visa_v1: Optional[List[Dict[str, Any]]] = Field(None, description='an list map of Passport Claims see https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md#passport-claim-format')
-    
-    
