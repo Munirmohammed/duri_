@@ -33,6 +33,8 @@ services:
     networks:
       - db
       - intranet
+    volumes:
+      - ./keto.yml:/home/ory/keto.yml
     ports:
       - "4466:4466" ## only when devel deployment
       - "4467:4467" ## only when devel deployment
