@@ -26,22 +26,41 @@ services:
 
   keto:
     image: oryd/keto:v0.8.0-alpha.2
-    command: ["migrate", "up", "-y"]
+    entrypoint: /bin/sh
+    command: "/start.sh"
     restart: on-failure
     depends_on:
-      - db
+      - keto-db
     networks:
-      - db
+      - keto_db
       - intranet
     volumes:
       - ./keto.yml:/home/ory/keto.yml
+      - ./keto/start.sh:/start.sh
     ports:
       - "4466:4466" ## only when devel deployment
       - "4467:4467" ## only when devel deployment
     environment:
       - LOG_LEVEL=debug
-      - DSN=postgres://postgres:admin@db:5432/accesscontroldb?sslmode=disable
-
+      - DSN=postgresql://postgres:secret@keto-db:5432/accesscontroldb?sslmode=disable
+  
+  keto-db:
+    image: postgres:12-alpine
+    #ports:
+    #  - '15432:5432'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=accesscontroldb
+      - POSTGRES_SERVER=keto_db
+    networks:
+      - keto_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
   db:
     image: postgres:12-alpine
     environment:
@@ -83,6 +102,7 @@ services:
 networks:
   db: {}
   intranet: {}
+  keto_db: {}
 
 volumes:
   postgres:

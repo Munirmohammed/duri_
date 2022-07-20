@@ -13,6 +13,8 @@ boto3
 #authetication/authorization
 pyjwt[crypto]
 #python-jose[cryptography]
+## permisions
+ory-keto-client
 ## utils
 stringcase
 requests
