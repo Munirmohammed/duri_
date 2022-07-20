@@ -17,3 +17,6 @@ exec:
 
 dev:
 	docker-compose -f docker-compose.dev.yml up --build --remove-orphans
+
+import:
+	docker-compose exec -it api python /app/scripts/importer.py

@@ -15,7 +15,10 @@ class Settings(BaseSettings):
     passport_algorithm: str = 'HS256'
     passport_token_expire_mins: int = 1440 ## 24 hours
     default_workspace: str = 'omic.ai'
+    default_team: str = 'default'
+    default_team_description: str = ''
     default_membership_type: str = 'contributor'
+    super_admin: str = '9004ff5e-20bd-49dc-ba00-2f4dafac9940'
     
 
 settings = Settings()

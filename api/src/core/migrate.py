@@ -1,3 +1,9 @@
+""" 
+WARNING: THIS SCRIPT HAS SHIFTED TO PATH `api/scripts/importer.py`
+
+DO NOT USE
+"""
+
 from sqlalchemy.orm import Session
 from src.services import cognito
 from src.core import tables, deps

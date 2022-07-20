@@ -124,8 +124,15 @@ class Workspace(WorkspaceBase):
 class UserWorkspace(BaseModel):
     user_id : Union[UUID4, str] = Field(None, description="the user_id")
     workspace_id: Union[UUID4, str] = Field(None, description="the workspace id")
-    team_id: Union[UUID4, str] = Field(None, description="the team id")
     membership: str = Field(None, description="the workspace membership")
+    created_at: Optional[datetime] = Field(None, description="the creation date")
+    class Config:
+        orm_mode = True
+class UserTeam(BaseModel):
+    user_id : Union[UUID4, str] = Field(None, description="the user_id")
+    workspace_id: Union[UUID4, str] = Field(None, description="the workspace id")
+    team_id: Union[UUID4, str] = Field(None, description="the team id")
+    membership: str = Field(None, description="the team membership")
     created_at: Optional[datetime] = Field(None, description="the creation date")
     class Config:
         orm_mode = True

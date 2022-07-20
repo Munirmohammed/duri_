@@ -78,7 +78,9 @@ async def verify(
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail='error decoding token')
     crud_user = crud.User(tables.User, db)
     crud_workspace = crud.Workspace(tables.Workspace, db)
+    crud_team = crud.Team(tables.Team, db)
     crud_user_workspace = crud.UserWorkspace(tables.UserWorkspace, db)
+    crud_user_team = crud.UserTeam(tables.UserTeam, db)
     username = claims['cognito:username']
     user_id = claims['sub']
     email = claims['email']
@@ -108,26 +110,44 @@ async def verify(
         workspace = crud_workspace.get_by_name(group)
         if not workspace:
             res, err = cognito.get_group(group)
+            if err:
+                continue
             if res:
                 cog_group = res['Group']
                 db_obj = {
                     'name': cog_group['GroupName'],
-                    'creator_id':'9004ff5e-20bd-49dc-ba00-2f4dafac9940', ## TODO: replace with user-sub from token , the caller of this endpoint 
+                    'creator_id':settings.super_admin, ## TODO: replace with user-sub from token , the caller of this endpoint 
                     'description': cog_group['Description'],
                     'created_at':cog_group['CreationDate'],
                     'updated_at':cog_group['LastModifiedDate'],
                 }
                 workspace = crud_workspace.create(db_obj)
-        if not workspace:
-            continue
+                team_obj = schema.TeamInsert(
+                    name=settings.default_team,
+                    workspace_id=workspace.id,
+                    description=settings.default_team_description,
+                    active=True,
+                    creator_id=settings.super_admin, ## TODO
+                )
+                team = crud_team.create(team_obj.dict(exclude_unset=True))
         workspace_id = workspace.id
         user_workspace = crud_user_workspace.filter_by(user_id, workspace_id, limit=1)
         if not user_workspace:
             db_obj = {
                 'user_id': user_id,
                 'workspace_id': workspace_id,
+                'membership': settings.default_membership_type,
             }
             user_workspace = crud_user_workspace.create(db_obj)
+            default_team = crud_team.filter_by(workspace_id=workspace_id, name=settings.default_team, limit=1)
+            team_id = default_team.id
+            team_db_obj = {
+                'user_id': user_id,
+                'workspace_id': workspace_id,
+                'team_id': team_id,
+                'membership': settings.default_membership_type,
+            }
+            user_team = crud_user_team.create(team_db_obj)
     expires_delta = settings.passport_token_expire_mins
     now = datetime.utcnow()
     expire = now + timedelta(minutes=expires_delta)

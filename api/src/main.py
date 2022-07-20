@@ -2,7 +2,7 @@
 from fastapi import FastAPI, Depends
 from starlette.responses import RedirectResponse
 from sqlalchemy.orm import Session
-from .core import  deps, migrate
+from .core import  deps ##, migrate
 from .core.config import settings
 from .routes import router as api_router
 from .auth_router import router as auth_router
@@ -19,7 +19,8 @@ app = FastAPI(
 @app.on_event("startup")
 def startup():
     print('startup')
-    #migrate.migrate_workspaces() ## NOTE: activate this function when deploying
+    ## NOTE: -  we now migrate via calling /workspace endpoint during post-deployment , see make import
+    ### migrate.migrate_workspaces() ## NOTE: activate this function when deploying
     
 
 @app.on_event("shutdown")

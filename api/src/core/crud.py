@@ -31,6 +31,22 @@ class Team(CRUDBase):
             return query.limit(limit).all()
 
 class UserWorkspace(CRUDBase):
+    def filter_by(self, user_id: str = None, workspace_id: str = None, skip: int = 0, limit: int = 50) -> Optional[List]:
+        db = self.db
+        db_model = self.model
+        query = db.query(db_model)
+        if user_id:
+            query = query.filter(db_model.user_id == user_id)
+        
+        if workspace_id:
+            query = query.filter(db_model.workspace_id == workspace_id)
+
+        if limit == 1:
+            return query.first()
+        else:
+            query = query.order_by(db_model.created_at.asc()).offset(skip)
+            return query.limit(limit).all()
+class UserTeam(CRUDBase):
     def filter_by(self, user_id: str = None, workspace_id: str = None, team_id: str = None, skip: int = 0, limit: int = 50) -> Optional[List]:
         db = self.db
         db_model = self.model

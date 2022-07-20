@@ -212,6 +212,7 @@ def get_group(group_name: str):
         Groups map to workspaces in this api
         Ref: https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_GetGroup.html
         
+        NOTE: it will return `None, None` if provided `group_name` not exists in the cognito-pool
     """
     client = boto3.client('cognito-idp', region_name=USER_POOL_REGION)
     try:
