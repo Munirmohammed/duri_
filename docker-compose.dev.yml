@@ -24,6 +24,22 @@ services:
       - db
       - intranet
 
+  keto:
+    image: oryd/keto:v0.8.0-alpha.2
+    command: ["migrate", "up", "-y"]
+    restart: on-failure
+    depends_on:
+      - db
+    networks:
+      - db
+      - intranet
+    ports:
+      - "4466:4466" ## only when devel deployment
+      - "4467:4467" ## only when devel deployment
+    environment:
+      - LOG_LEVEL=debug
+      - DSN=postgres://postgres:admin@db:5432/accesscontroldb?sslmode=disable
+
   db:
     image: postgres:12-alpine
     environment:

@@ -41,7 +41,7 @@ class Workspace(Base):
 class Team(Base):
     __tablename__ = 'team'
     id = Column(UUID(as_uuid=True), primary_key=True, unique=True, nullable=False, default=uuid4)
-    name = Column(String, unique=True, nullable=False)
+    name = Column(String, nullable=False)
     workspace_id = Column(UUID(as_uuid=True), ForeignKey('workspace.id'), nullable=True)
     creator_id = Column(String, nullable=False)
     active = Column(Boolean, nullable=False)
@@ -49,8 +49,8 @@ class Team(Base):
     tags = Column(ARRAY(String), nullable=True)
     avatar = Column(String, nullable=True)
     ui_customization = Column(JSON, nullable=True)
-    created_at = Column(DateTime(timezone=True), nullable=False)
-    updated_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=True)
     workspace = relationship("Workspace", back_populates="teams")
 
 class UserWorkspace(Base):
