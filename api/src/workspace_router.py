@@ -45,6 +45,9 @@ async def create_workspace(
 
     crud_workspace = crud.Workspace(tables.Workspace, db)
     crud_team = crud.Team(tables.Team, db)
+    crud_user_workspace = crud.UserWorkspace(tables.UserWorkspace, db)
+    crud_user_team = crud.UserTeam(tables.UserTeam, db)
+
     workspace = crud_workspace.get_by_name(name)
     res, err = cognito.get_group(name)
     if res and workspace:
@@ -72,6 +75,7 @@ async def create_workspace(
     }
     workspace = crud_workspace.create(db_obj)
     workspace_id = workspace.id
+
     ## create 'default' Team for this workspace
     team_obj = schema.TeamInsert(
         name=settings.default_team,
@@ -80,7 +84,26 @@ async def create_workspace(
         active=True,
         creator_id=user_id, 
     )
-    crud_team.create(team_obj.dict(exclude_unset=True))
+    team = crud_team.create(team_obj.dict(exclude_unset=True))
+    team_id = team.id
+    ## now relate the user to the workspace and team , with admin role
+    user_workspace = crud_user_workspace.filter_by(user_id, workspace_id, limit=1)
+    if not user_workspace:
+        user_ws_obj = {
+            'user_id': user_id,
+            'workspace_id': workspace_id,
+            'membership': 'admin', ## by default a user is added as a contributor to a workspace
+        }
+        user_workspace = crud_user_workspace.create(user_ws_obj)
+    user_team = crud_user_team.filter_by(user_id, workspace_id, team_id=team_id, limit=1)
+    if not user_team:
+        user_team_obj = {
+            'user_id': user_id,
+            'workspace_id': workspace_id,
+            'team_id': team_id,
+            'membership': 'admin',
+        }
+        user_team = crud_user_team.create(user_team_obj)
     return workspace
 
 @router.get("/workspace/{name}", response_model=schema.Workspace, tags=["Workspace"])
@@ -114,6 +137,8 @@ async def create_team(
 
     crud_workspace = crud.Workspace(tables.Workspace, db)
     crud_team = crud.Team(tables.Team, db)
+    crud_user_team = crud.UserTeam(tables.UserTeam, db)
+
     workspace = crud_workspace.get_by_name(workspace_name)
     if not workspace:
         raise HTTPException(status_code=400, detail="workspace not exists")
@@ -129,7 +154,14 @@ async def create_team(
         creator_id=user_id,
     )
     team = crud_team.create(team_obj.dict(exclude_unset=True))
-    
+    team_id = team.id
+    user_team_obj = {
+        'user_id': user_id,
+        'workspace_id': workspace_id,
+        'team_id': team_id,
+        'membership': 'admin',
+    }
+    crud_user_team.create(user_team_obj)
     return team
 
 @router.get("/workspace/{workspace_name}/users", response_model=List[schema.UserWorkspace], tags=["Workspace"])

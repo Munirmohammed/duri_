@@ -35,7 +35,7 @@ services:
       - keto_db
       - intranet
     volumes:
-      - ./keto.yml:/home/ory/keto.yml
+      - ./keto/keto.yml:/home/ory/keto.yml
       - ./keto/start.sh:/start.sh
     ports:
       - "4466:4466" ## only when devel deployment
