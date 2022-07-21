@@ -43,11 +43,30 @@ async def create_workspace(
     ## TODO: - get userid from access-token , x_omic_userid used temporary for now
     user_id = x_omic_userid or '9004ff5e-20bd-49dc-ba00-2f4dafac9940'
 
+    crud_user = crud.User(tables.User, db)
     crud_workspace = crud.Workspace(tables.Workspace, db)
     crud_team = crud.Team(tables.Team, db)
     crud_user_workspace = crud.UserWorkspace(tables.UserWorkspace, db)
     crud_user_team = crud.UserTeam(tables.UserTeam, db)
-
+    
+    user_obj = crud_user.get(user_id)
+    if not user_obj:
+        attr = ['email', 'sub']
+        r, e = cognito.list_users(f'sub = "{user_id}"', attr)
+        print(r, e)
+        if r:
+            cognito_user = r['Users'][0] if len(r['Users']) > 0 else None
+            if cognito_user:
+                attributes = { cognito_user['Attributes'][i]['Name'] : cognito_user['Attributes'][i]['Value'] for i in range(0, len(cognito_user['Attributes']) ) } 
+                print(attributes)
+                usr_db_obj = {
+                    'id': attributes['sub'] ,
+                    'email': attributes['email'] ,
+                    'username': cognito_user['Username'] ,
+                    'created_at': cognito_user['UserCreateDate'] ,
+                    'updated_at': cognito_user['UserLastModifiedDate'] ,
+                }
+                user_obj = crud_user.create(usr_db_obj)
     workspace = crud_workspace.get_by_name(name)
     res, err = cognito.get_group(name)
     if res and workspace:
