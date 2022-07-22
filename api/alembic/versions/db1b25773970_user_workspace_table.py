@@ -76,10 +76,12 @@ def upgrade():
         sa.Column("membership", sa.String(), nullable=True, server_default="contributor", comment="membership type to that team, ie contributor | admin"), # user | admin
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=func.now()),
     )
+    op.add_column('user', sa.Column("active_team_id", UUID(as_uuid=True), sa.ForeignKey('team.id'), nullable=True)) # 
     
 
 
 def downgrade():
+    op.drop_column('user', 'active_team_id')
     op.drop_table("user_team")
     op.drop_table("user_workspace")
     op.drop_table("team")

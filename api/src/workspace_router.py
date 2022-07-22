@@ -49,8 +49,8 @@ async def create_workspace(
     crud_user_workspace = crud.UserWorkspace(tables.UserWorkspace, db)
     crud_user_team = crud.UserTeam(tables.UserTeam, db)
     
-    user_obj = crud_user.get(user_id)
-    if not user_obj:
+    user = crud_user.get(user_id)
+    if not user:
         attr = ['email', 'sub']
         r, e = cognito.list_users(f'sub = "{user_id}"', attr)
         print(r, e)
@@ -66,7 +66,9 @@ async def create_workspace(
                     'created_at': cognito_user['UserCreateDate'] ,
                     'updated_at': cognito_user['UserLastModifiedDate'] ,
                 }
-                user_obj = crud_user.create(usr_db_obj)
+                user = crud_user.create(usr_db_obj)
+    if not user:
+        raise HTTPException(status_code=400, detail="user not exists")   
     workspace = crud_workspace.get_by_name(name)
     res, err = cognito.get_group(name)
     if res and workspace:
@@ -123,6 +125,8 @@ async def create_workspace(
             'membership': 'admin',
         }
         user_team = crud_user_team.create(user_team_obj)
+    if not user.active_team:
+        crud_user.set_active_team(user_id, team_id)
     return workspace
 
 @router.get("/workspace/{name}", response_model=schema.Workspace, tags=["Workspace"])

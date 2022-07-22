@@ -11,6 +11,14 @@ class User(CRUDBase):
     def get_by_username(self, username: str) -> tables.User:
         db = self.db
         return db.query(self.model).filter(self.model.username == username).first()
+    def set_active_team(self, user_id: str, team_id: str) -> tables.User:
+        db = self.db
+        user = self.get(user_id)
+        user.active_team_id = team_id
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return user
 
 class Workspace(CRUDBase):
     pass

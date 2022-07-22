@@ -131,6 +131,8 @@ async def verify(
                 )
                 team = crud_team.create(team_obj.dict(exclude_unset=True))
         workspace_id = workspace.id
+        default_team = crud_team.filter_by(workspace_id=workspace_id, name=settings.default_team, limit=1)
+        team_id = default_team.id
         user_workspace = crud_user_workspace.filter_by(user_id, workspace_id, limit=1)
         if not user_workspace:
             db_obj = {
@@ -139,8 +141,6 @@ async def verify(
                 'membership': settings.default_membership_type,
             }
             user_workspace = crud_user_workspace.create(db_obj)
-            default_team = crud_team.filter_by(workspace_id=workspace_id, name=settings.default_team, limit=1)
-            team_id = default_team.id
             team_db_obj = {
                 'user_id': user_id,
                 'workspace_id': workspace_id,
@@ -148,6 +148,8 @@ async def verify(
                 'membership': settings.default_membership_type,
             }
             user_team = crud_user_team.create(team_db_obj)
+            if not user.active_team:
+                user = crud_user.set_active_team(user_id, team_id)
     expires_delta = settings.passport_token_expire_mins
     now = datetime.utcnow()
     expire = now + timedelta(minutes=expires_delta)

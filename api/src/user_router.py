@@ -17,7 +17,7 @@ router = APIRouter()
 
 @router.post("/user/{user}/workspace", tags=["User"])
 async def add_user_to_workspace_team(
-    user: str = Path(..., description="the user-id"),
+    user_id: str = Path(..., description="the user-id"),
     workspace: str = Form(..., description="the workspace name"),
     team: Optional[str] = Form(settings.default_team, description="a team name within the workspace"),
     membership: str = Form(settings.default_membership_type, description="a the membership of the user in that team. ."),
@@ -39,9 +39,9 @@ async def add_user_to_workspace_team(
     workspace_obj = crud_workspace.get_by_name(workspace)
     if not workspace_obj:
         raise HTTPException(status_code=400, detail="workspace not exists")
-    user_obj = crud_user.get(user)
+    user = crud_user.get(user_id)
 
-    if not user_obj:
+    if not user:
         ## checks cognito for this user and create if not exists
         ## NOTE: to check for user existance in cognito-group use: "sub = \"{user}\""
         attr = ['email', 'sub']
@@ -61,9 +61,9 @@ async def add_user_to_workspace_team(
             'created_at': cognito_user['UserCreateDate'] ,
             'updated_at': cognito_user['UserLastModifiedDate'] ,
         }
-        user_obj = crud_user.create(db_obj)
-    user_id = user_obj.id
-    username = user_obj.username
+        user = crud_user.create(db_obj)
+    user_id = user.id
+    username = user.username
     workspace_id = workspace_obj.id
     workspace_name = workspace_obj.name
     team_obj = crud_team.filter_by(workspace_id=workspace_id, name=team, limit=1)
@@ -101,6 +101,8 @@ async def add_user_to_workspace_team(
         'membership': membership,
     }
     user_team = crud_user_team.create(team_db_obj)
+    if not user.active_team:
+        user = crud_user.set_active_team(user_id, team_id)
     #print(user_workspace)
     return team_db_obj
 
@@ -115,6 +117,9 @@ async def list_user_workspaces(
     ## TODO:
     crud_user = crud.User(tables.User, db)
     user = crud_user.get(user_id)
+    if not user:
+        ## ensure that the team exists before procedeeing
+        raise HTTPException(status_code=400, detail="user not exists")
     print(user.workspaces)
     print(type(user.workspaces))
     res = []
@@ -140,6 +145,9 @@ async def get_user_teams(
     ## TODO:
     crud_user = crud.User(tables.User, db)
     user = crud_user.get(user_id)
+    if not user:
+        ## ensure that the team exists before procedeeing
+        raise HTTPException(status_code=400, detail="user not exists")
     #print(user.teams)
     res = []
     ## convert sqlchemy model to pydantic , see https://pydantic-docs.helpmanual.io/usage/models/#orm-mode-aka-arbitrary-class-instances

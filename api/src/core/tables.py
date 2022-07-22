@@ -22,8 +22,10 @@ class User(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, unique=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
     username = Column(String, unique=True, nullable=False)
+    active_team_id = Column(UUID(as_uuid=True), ForeignKey('team.id'), nullable=True)
     created_at = Column(DateTime(timezone=True), nullable=False)
     updated_at = Column(DateTime(timezone=True), nullable=True)
+    active_team = relationship("Team")
     #teams = association_proxy("user_teams", "team")
     #workspaces = association_proxy("user_workspaces", "workspace")
     user_workspaces = relationship(
@@ -67,7 +69,7 @@ class Team(Base):
     __tablename__ = 'team'
     id = Column(UUID(as_uuid=True), primary_key=True, unique=True, nullable=False, default=uuid4)
     name = Column(String, nullable=False)
-    workspace_id = Column(UUID(as_uuid=True), ForeignKey('workspace.id'), nullable=True)
+    workspace_id = Column(UUID(as_uuid=True), ForeignKey('workspace.id'), nullable=False)
     creator_id = Column(String, nullable=False)
     active = Column(Boolean, nullable=False)
     description = Column(String, nullable=True)
