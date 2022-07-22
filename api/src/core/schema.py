@@ -121,6 +121,11 @@ class Workspace(WorkspaceBase):
     created_at: Optional[datetime] = Field(None, description="the actual creation date")
     updated_at: Optional[datetime] = Field(None, description="last update date")
 
+class Team(TeamBase):
+    created_at: Optional[datetime] = Field(None, description="the actual creation date")
+    updated_at: Optional[datetime] = Field(None, description="last update date")
+    workspace : WorkspaceMini = Field(None, description="the workspace")
+
 class UserWorkspace(BaseModel):
     user_id : Union[UUID4, str] = Field(None, description="the user_id")
     workspace_id: Union[UUID4, str] = Field(None, description="the workspace id")
@@ -136,6 +141,15 @@ class UserTeam(BaseModel):
     created_at: Optional[datetime] = Field(None, description="the creation date")
     class Config:
         orm_mode = True
+
+class UserWorkspaceAssoc(WorkspaceBase):
+    membership : str = Field(None, description="the membership type")
+
+class UserTeamAssoc(TeamBase):
+    membership : str = Field(None, description="the membership type")
+    created_at: Optional[datetime] = Field(None, description="the actual creation date")
+    updated_at: Optional[datetime] = Field(None, description="last update date")
+    workspace : WorkspaceMini = Field(None, description="the workspace")
 
 #class GetUserWorkspace(UserWorkspace):
 #    pass

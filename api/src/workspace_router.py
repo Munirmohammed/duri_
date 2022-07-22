@@ -183,6 +183,18 @@ async def create_team(
     crud_user_team.create(user_team_obj)
     return team
 
+@router.get("/workspace/{workspace_name}/team", response_model=List[schema.TeamBase], tags=["Workspace"])
+async def list_teams(
+    workspace_name: str = Path(..., description="the workspace name"),
+    db: Session = Depends(deps.get_db),
+):
+    """
+    List workspace teams
+    """
+    crud_workspace = crud.Workspace(tables.Workspace, db)
+    workspace = crud_workspace.get_by_name(workspace_name)
+    return workspace.teams
+
 @router.get("/workspace/{workspace_name}/users", response_model=List[schema.UserWorkspace], tags=["Workspace"])
 async def get_workspace_users(
     workspace_name: str = Path(..., description="the workspace name"),

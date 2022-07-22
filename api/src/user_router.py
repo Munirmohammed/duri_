@@ -104,13 +104,51 @@ async def add_user_to_workspace_team(
     #print(user_workspace)
     return team_db_obj
 
-@router.get("/user/{user}/workspace", tags=["User"])
-async def get_user_workspaces(
-    user: str = Path(..., description="the user-id"),
+@router.get("/user/{user_id}/workspace", response_model=List[schema.UserWorkspaceAssoc], tags=["User"])
+async def list_user_workspaces(
+    user_id: str = Path(..., description="the user-id"),
     db: Session = Depends(deps.get_db),
 ):
     """
-    Get workspaces a user belongs to
+    List workspaces a user belongs to
     """
     ## TODO:
-    return None
+    crud_user = crud.User(tables.User, db)
+    user = crud_user.get(user_id)
+    print(user.workspaces)
+    print(type(user.workspaces))
+    res = []
+    ## convert sqlchemy model to pydantic , see https://pydantic-docs.helpmanual.io/usage/models/#orm-mode-aka-arbitrary-class-instances
+    for k, v in user.workspaces.items():
+        print(k, v)
+        w = schema.WorkspaceBase.from_orm(v).dict()
+        w['membership']=k
+        print(w)
+        res.append(w)
+    #res = list(user.workspaces)
+    print(res)
+    return res
+
+@router.get("/user/{user_id}/team", response_model=List[schema.UserTeamAssoc], tags=["User"])
+async def get_user_teams(
+    user_id: str = Path(..., description="the user-id"),
+    db: Session = Depends(deps.get_db),
+):
+    """
+    List teams a user belongs to
+    """
+    ## TODO:
+    crud_user = crud.User(tables.User, db)
+    user = crud_user.get(user_id)
+    #print(user.teams)
+    res = []
+    ## convert sqlchemy model to pydantic , see https://pydantic-docs.helpmanual.io/usage/models/#orm-mode-aka-arbitrary-class-instances
+    for k, v in user.teams.items():
+        print(k, v)
+        w = schema.Team.from_orm(v).dict()
+        w['membership']=k
+        print(w)
+        res.append(w)
+    #res = list(user.teams)
+    #print(type(res))
+    return res

@@ -3,6 +3,7 @@ from email.policy import default
 from sqlalchemy import Table, Column, Integer, BigInteger, String, ForeignKey, DateTime, JSON, TEXT, Boolean
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.dialects.postgresql import UUID, ENUM, ARRAY
 from sqlalchemy.schema import Sequence
 from sqlalchemy.sql import func
@@ -23,6 +24,30 @@ class User(Base):
     username = Column(String, unique=True, nullable=False)
     created_at = Column(DateTime(timezone=True), nullable=False)
     updated_at = Column(DateTime(timezone=True), nullable=True)
+    #teams = association_proxy("user_teams", "team")
+    #workspaces = association_proxy("user_workspaces", "workspace")
+    user_workspaces = relationship(
+        "UserWorkspace",
+        back_populates="user",
+        collection_class=attribute_mapped_collection("membership"),
+        cascade="all, delete-orphan",
+    )
+    user_teams = relationship(
+        "UserTeam",
+        back_populates="user",
+        collection_class=attribute_mapped_collection("membership"),
+        cascade="all, delete-orphan",
+    )
+    workspaces = association_proxy(
+        "user_workspaces", 
+        "workspace",
+        creator=lambda k, v: UserWorkspace(membership=k, workspace=v),
+    )
+    teams = association_proxy(
+        "user_teams", 
+        "team",
+        creator=lambda k, v: UserTeam(membership=k, team=v),
+    )
 
 class Workspace(Base):
     __tablename__ = 'workspace'
@@ -60,6 +85,17 @@ class UserWorkspace(Base):
     #team_id = Column(UUID(as_uuid=True),  ForeignKey('team.id'), nullable=True)
     membership = Column(String, nullable=True, default='contributor')
     created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+    #user = relationship(User, backref=backref("user_workspaces"))
+    user = relationship(
+        User,
+        back_populates="user_workspaces",
+    )
+    workspace = relationship("Workspace")
+    """ def __init__(self, user_id=None, workspace_id=None, membership=None, created_at=None):
+        self.user_id = user_id
+        self.workspace_id = workspace_id
+        self.membership = membership
+        self.created_at = created_at """
 
 class UserTeam(Base):
     __tablename__ = 'user_team'
@@ -68,3 +104,15 @@ class UserTeam(Base):
     team_id = Column(UUID(as_uuid=True),  ForeignKey('team.id'), primary_key=True, nullable=False)
     membership = Column(String, nullable=True, default='contributor')
     created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+    #user = relationship(User, backref=backref("user_teams"))
+    user = relationship(
+        User,
+        back_populates="user_teams",
+    )
+    team = relationship("Team")
+    """ def __init__(self, user_id=None, workspace_id=None, team_id=None, membership=None, created_at=None):
+        self.user_id = user_id
+        self.workspace_id = workspace_id
+        self.team_id = team_id
+        self.membership = membership
+        self.created_at = created_at """
