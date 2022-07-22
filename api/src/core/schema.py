@@ -74,6 +74,15 @@ service_info_response = {
     "version": "2.0.0"
 }
 
+class UserBase(BaseModel):
+    id: Union[UUID4, str] = Field(..., description="id of the user")
+    email: str = Field(..., description="user email")
+    username: str = Field(..., description="user username")
+    created_at: Optional[datetime] = Field(None, description="the actual creation date")
+    updated_at: Optional[datetime] = Field(None, description="last update date")
+    class Config:
+        orm_mode = True
+
 class WorkspaceBase(BaseModel):
     id: Union[UUID4, str] = Field(..., description="id of the workspace")
     name: str = Field(..., description="name of the workspace")
@@ -154,6 +163,9 @@ class UserTeamAssoc(TeamBase):
 
 #class GetUserWorkspace(UserWorkspace):
 #    pass
+
+class UserProfile(UserBase):
+    teams: List[UserTeamAssoc] = Field(..., description="the user teams")
 
 class PassportVisaToken(BaseModel):
     """

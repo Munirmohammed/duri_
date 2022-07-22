@@ -4,16 +4,29 @@ from datetime import datetime
 from urllib.parse import urlparse
 from pydantic import Json
 from typing import Optional, List, Any, Dict, Union
-from fastapi import APIRouter, Depends, Query, Path,  Form, File, UploadFile, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, Query, Header, Path,  Form, File, UploadFile, HTTPException, BackgroundTasks
 from starlette.status import HTTP_403_FORBIDDEN
 from sqlalchemy.orm import Session
-from .core import  deps, schema, crud, tables
+from .core import  deps, schema, crud, tables, crud_utils
 from .core.config import settings
 from .services import cognito
 
 router = APIRouter()
 
 ## User management Routes
+@router.post("/user/profile", response_model=schema.UserProfile, tags=["User"])
+async def get_user_profile(
+    x_omic_userid: Union[str, None] = Header(default=None, description="the user-id from header (temporary)"),
+):
+    """
+    Get user profile
+    """
+    user_id = x_omic_userid
+    user = crud_utils.get_user(user_id)
+    teams = crud_utils.get_user_teams(user)
+    user_profile = schema.UserBase.from_orm(user).dict()
+    user_profile['teams'] = teams
+    return user_profile
 
 @router.post("/user/{user}/workspace", tags=["User"])
 async def add_user_to_workspace_team(
