@@ -28,9 +28,10 @@ async def get_user_profile(
     user_profile['teams'] = teams
     return user_profile
 
-@router.post("/user/{user}/workspace", tags=["User"])
+@router.post("/user/workspace", tags=["User"])
 async def add_user_to_workspace_team(
-    user_id: str = Path(..., description="the user-id"),
+    #user_id: str = Path(..., description="the user-id"),
+    x_omic_userid: Union[str, None] = Header(default=None, description="the user-id from header (temporary)"),
     workspace: str = Form(..., description="the workspace name"),
     team: Optional[str] = Form(settings.default_team, description="a team name within the workspace"),
     membership: str = Form(settings.default_membership_type, description="a the membership of the user in that team. ."),
@@ -44,39 +45,21 @@ async def add_user_to_workspace_team(
     """
     ## TODO: 
     ##  - only admin workspace user can add a user to workspace
+
     crud_user = crud.User(tables.User, db)
     crud_workspace = crud.Workspace(tables.Workspace, db)
     crud_team = crud.Team(tables.Team, db)
     crud_user_workspace = crud.UserWorkspace(tables.UserWorkspace, db)
     crud_user_team = crud.UserTeam(tables.UserTeam, db)
+
+    user = crud_utils.get_user(x_omic_userid)
+    user_id = user.id
+    username = user.username
+
     workspace_obj = crud_workspace.get_by_name(workspace)
     if not workspace_obj:
         raise HTTPException(status_code=400, detail="workspace not exists")
-    user = crud_user.get(user_id)
-
-    if not user:
-        ## checks cognito for this user and create if not exists
-        ## NOTE: to check for user existance in cognito-group use: "sub = \"{user}\""
-        attr = ['email', 'sub']
-        res, err = cognito.list_users(f'sub = "{user}"', attr)
-        print(res, err)
-        if err:
-            raise HTTPException(status_code=400, detail="user not exists")
-        cognito_user = res['Users'][0] if len(res['Users']) > 0 else None
-        if not cognito_user:
-            raise HTTPException(status_code=400, detail="user not exists")
-        attributes = { cognito_user['Attributes'][i]['Name'] : cognito_user['Attributes'][i]['Value'] for i in range(0, len(cognito_user['Attributes']) ) } 
-        print(attributes)
-        db_obj = {
-            'id': attributes['sub'] ,
-            'email': attributes['email'] ,
-            'username': cognito_user['Username'] ,
-            'created_at': cognito_user['UserCreateDate'] ,
-            'updated_at': cognito_user['UserLastModifiedDate'] ,
-        }
-        user = crud_user.create(db_obj)
-    user_id = user.id
-    username = user.username
+    
     workspace_id = workspace_obj.id
     workspace_name = workspace_obj.name
     team_obj = crud_team.filter_by(workspace_id=workspace_id, name=team, limit=1)
@@ -119,60 +102,27 @@ async def add_user_to_workspace_team(
     #print(user_workspace)
     return team_db_obj
 
-@router.get("/user/{user_id}/workspace", response_model=List[schema.UserWorkspaceAssoc], tags=["User"])
+@router.get("/user/workspaces", response_model=List[schema.UserWorkspaceAssoc], tags=["User"])
 async def list_user_workspaces(
-    user_id: str = Path(..., description="the user-id"),
+    x_omic_userid: Union[str, None] = Header(default=None, description="the user-id from header (temporary)"),
     db: Session = Depends(deps.get_db),
 ):
     """
     List workspaces a user belongs to
     """
-    crud_user = crud.User(tables.User, db)
-    user = crud_user.get(user_id)
-    if not user:
-        ## ensure that the team exists before procedeeing
-        raise HTTPException(status_code=400, detail="user not exists")
-    #print(user.workspaces)
-    print(user.user_workspaces)
-    #print(type(user.workspaces))
-    res = []
-    ## convert sqlchemy model to pydantic , see https://pydantic-docs.helpmanual.io/usage/models/#orm-mode-aka-arbitrary-class-instances
-    for k in user.user_workspaces: #.items():
-        print(k)
-        w = schema.WorkspaceBase.from_orm(k.workspace).dict()
-        w['membership']=k.membership
-        print(w)
-        res.append(w)
-    #res = list(user.workspaces)
-    print(res)
-    return res
+    user = crud_utils.get_user(x_omic_userid)
+    user_workspaces = crud_utils.get_user_workspaces(user)
+    return user_workspaces
+    
 
-@router.get("/user/{user_id}/team", response_model=List[schema.UserTeamAssoc], tags=["User"])
+@router.get("/user/teams", response_model=List[schema.UserTeamAssoc], tags=["User"])
 async def get_user_teams(
-    user_id: str = Path(..., description="the user-id"),
+    x_omic_userid: Union[str, None] = Header(default=None, description="the user-id from header (temporary)"),
     db: Session = Depends(deps.get_db),
 ):
     """
     List teams a user belongs to
     """
-    crud_user = crud.User(tables.User, db)
-    user = crud_user.get(user_id)
-    if not user:
-        ## ensure that the team exists before procedeeing
-        raise HTTPException(status_code=400, detail="user not exists")
-    #print(user.user_teams)
-    active_team_id = user.active_team_id
-    print(user.active_team_id)
-    res = []
-    ## convert sqlchemy model to pydantic , see https://pydantic-docs.helpmanual.io/usage/models/#orm-mode-aka-arbitrary-class-instances
-    for k in user.user_teams: #.items():
-        print(k)
-        w = schema.Team.from_orm(k.team).dict()
-        print(str(w['id']), active_team_id, str(w['id']) == str(active_team_id))
-        w['membership']=k.membership
-        w['is_active']= str(w['id']) == str(active_team_id)
-        print(w)
-        res.append(w)
-    #res = list(user.teams)
-    #print(type(res))
-    return res
+    user = crud_utils.get_user(x_omic_userid)
+    user_teams = crud_utils.get_user_teams(user)
+    return user_teams

@@ -130,9 +130,11 @@ class Workspace(WorkspaceBase):
     created_at: Optional[datetime] = Field(None, description="the actual creation date")
     updated_at: Optional[datetime] = Field(None, description="last update date")
 
-class Team(TeamBase):
+class TeamMini(TeamBase):
     created_at: Optional[datetime] = Field(None, description="the actual creation date")
     updated_at: Optional[datetime] = Field(None, description="last update date")
+    
+class Team(TeamMini):
     workspace : WorkspaceMini = Field(None, description="the workspace")
 
 class UserWorkspace(BaseModel):
@@ -157,9 +159,10 @@ class UserWorkspaceAssoc(WorkspaceBase):
 class UserTeamAssoc(TeamBase):
     is_active : bool = Field(False, description="if this team is the current active user team")
     membership : str = Field(None, description="the membership type")
+    workspace : str = Field(None, description="the workspace name")
     created_at: Optional[datetime] = Field(None, description="the actual creation date")
     updated_at: Optional[datetime] = Field(None, description="last update date")
-    workspace : WorkspaceMini = Field(None, description="the workspace")
+    #workspace : WorkspaceMini = Field(None, description="the workspace")
 
 #class GetUserWorkspace(UserWorkspace):
 #    pass

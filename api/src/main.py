@@ -33,7 +33,7 @@ def main():
 
 app.include_router(api_router) # prefix=settings.API_V1_STR
 app.include_router(auth_router)
-app.include_router(workspace_router)
 app.include_router(user_router)
+app.include_router(workspace_router)
 
 handler = app

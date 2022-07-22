@@ -34,13 +34,24 @@ def get_user(user_id: str) -> tables.User:
         raise HTTPException(status_code=400, detail="user not exists")
     return user
 
-def get_user_teams(user: tables.User) -> List[schema.UserTeam]:
+def get_user_workspaces(user: tables.User) -> List[schema.UserWorkspaceAssoc]:
+    workspaces = []
+    ## convert sqlchemy model to pydantic , see https://pydantic-docs.helpmanual.io/usage/models/#orm-mode-aka-arbitrary-class-instances
+    for k in user.user_workspaces:
+        w = schema.WorkspaceBase.from_orm(k.workspace).dict()
+        w['membership']=k.membership
+        workspaces.append(w)
+    #print(workspaces)
+    return workspaces
+
+def get_user_teams(user: tables.User) -> List[schema.UserTeamAssoc]:
     active_team_id = user.active_team_id
     ## convert sqlchemy model to pydantic , see https://pydantic-docs.helpmanual.io/usage/models/#orm-mode-aka-arbitrary-class-instances
     teams = []
     for k in user.user_teams:
-        t = schema.Team.from_orm(k.team).dict()
+        t = schema.TeamMini.from_orm(k.team).dict()
         t['membership']=k.membership
         t['is_active']= str(t['id']) == str(active_team_id)
+        t['workspace'] = k.team.workspace.name
         teams.append(t)
     return teams
