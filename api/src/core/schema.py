@@ -74,27 +74,24 @@ service_info_response = {
     "version": "2.0.0"
 }
 
-class UserBase(BaseModel):
-    id: Union[UUID4, str] = Field(..., description="id of the user")
-    email: str = Field(..., description="user email")
-    username: str = Field(..., description="user username")
-    created_at: Optional[datetime] = Field(None, description="the actual creation date")
-    updated_at: Optional[datetime] = Field(None, description="last update date")
+
+class WorkspaceBaseMini(BaseModel):
+    id: Union[UUID4, str] = Field(..., description="id of the workspace")
+    name: str = Field(..., description="name of the workspace")
+    description: Optional[str] = Field(None, description="description of the workspace")
+    active: bool = Field(..., description="if the workspace is active or disabled")
     class Config:
         orm_mode = True
 
-class WorkspaceBase(BaseModel):
-    id: Union[UUID4, str] = Field(..., description="id of the workspace")
-    name: str = Field(..., description="name of the workspace")
-    active: bool = Field(..., description="if the workspace is active or disabled")
-    description: Optional[str] = Field(None, description="description of the workspace")
+class WorkspaceBase(WorkspaceBaseMini):
+    #active: bool = Field(..., description="if the workspace is active or disabled")
+    #description: Optional[str] = Field(None, description="description of the workspace")
     avatar: Optional[str] = Field(None, description="link to the workspace logo image")
     tags: Optional[List[str]] = Field(None, description="tag lebels")
     ui_customization: Optional[Dict[str, Any]] = Field(None, description="an object of ui customizable items for ui ie. the object would have entry `background_image` for background image of the cards")
     #created_at: Optional[datetime] = Field(None, description="the actual creation date")
     #updated_at: Optional[datetime] = Field(None, description="last update date")
-    class Config:
-        orm_mode = True
+    
 
 class TeamBase(BaseModel):
     id: Union[UUID4, str] = Field(..., description="id of the team")
@@ -108,6 +105,17 @@ class TeamBase(BaseModel):
     updated_at: Optional[datetime] = Field(None, description="last update date")
     class Config:
         orm_mode = True
+
+class UserBase(BaseModel):
+    id: Union[UUID4, str] = Field(..., description="id of the user")
+    email: str = Field(..., description="user email")
+    username: str = Field(..., description="user username")
+    #active_team_id: Optional[Union[UUID4, str]] = Field(None, description="the current active team id")
+    created_at: Optional[datetime] = Field(None, description="the actual creation date")
+    updated_at: Optional[datetime] = Field(None, description="last update date")
+    class Config:
+        orm_mode = True
+
 
 class TeamInsert(BaseModel):
     name: str = Field(..., description="name of the team")
@@ -135,7 +143,7 @@ class TeamMini(TeamBase):
     updated_at: Optional[datetime] = Field(None, description="last update date")
     
 class Team(TeamMini):
-    workspace : WorkspaceMini = Field(None, description="the workspace")
+    workspace : WorkspaceBaseMini = Field(None, description="the workspace")
 
 class UserWorkspace(BaseModel):
     user_id : Union[UUID4, str] = Field(None, description="the user_id")
@@ -168,7 +176,8 @@ class UserTeamAssoc(TeamBase):
 #    pass
 
 class UserProfile(UserBase):
-    teams: List[UserTeamAssoc] = Field(..., description="the user teams")
+    active_team: Team = Field(None, description="the current active team")
+    #teams: List[UserTeamAssoc] = Field(..., description="the user teams")
 
 class PassportVisaToken(BaseModel):
     """

@@ -23,10 +23,10 @@ async def get_user_profile(
     """
     user_id = x_omic_userid
     user = crud_utils.get_user(user_id)
-    teams = crud_utils.get_user_teams(user)
-    user_profile = schema.UserBase.from_orm(user).dict()
-    user_profile['teams'] = teams
-    return user_profile
+    #teams = crud_utils.get_user_teams(user)
+    #user_profile = schema.UserBase.from_orm(user).dict()
+    #user_profile['teams'] = teams
+    return user
 
 @router.post("/user/workspace", tags=["User"])
 async def add_user_to_workspace_team(
