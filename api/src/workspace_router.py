@@ -125,7 +125,8 @@ async def create_workspace(
             'membership': 'admin',
         }
         user_team = crud_user_team.create(user_team_obj)
-    if not user.active_team:
+    print('user.active_team', user.active_team_id)
+    if not user.active_team_id:
         crud_user.set_active_team(user_id, team_id)
     return workspace
 

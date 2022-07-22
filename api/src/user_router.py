@@ -101,7 +101,7 @@ async def add_user_to_workspace_team(
         'membership': membership,
     }
     user_team = crud_user_team.create(team_db_obj)
-    if not user.active_team:
+    if not user.active_team_id:
         user = crud_user.set_active_team(user_id, team_id)
     #print(user_workspace)
     return team_db_obj
@@ -114,20 +114,20 @@ async def list_user_workspaces(
     """
     List workspaces a user belongs to
     """
-    ## TODO:
     crud_user = crud.User(tables.User, db)
     user = crud_user.get(user_id)
     if not user:
         ## ensure that the team exists before procedeeing
         raise HTTPException(status_code=400, detail="user not exists")
-    print(user.workspaces)
-    print(type(user.workspaces))
+    #print(user.workspaces)
+    print(user.user_workspaces)
+    #print(type(user.workspaces))
     res = []
     ## convert sqlchemy model to pydantic , see https://pydantic-docs.helpmanual.io/usage/models/#orm-mode-aka-arbitrary-class-instances
-    for k, v in user.workspaces.items():
-        print(k, v)
-        w = schema.WorkspaceBase.from_orm(v).dict()
-        w['membership']=k
+    for k in user.user_workspaces: #.items():
+        print(k)
+        w = schema.WorkspaceBase.from_orm(k.workspace).dict()
+        w['membership']=k.membership
         print(w)
         res.append(w)
     #res = list(user.workspaces)
@@ -142,19 +142,22 @@ async def get_user_teams(
     """
     List teams a user belongs to
     """
-    ## TODO:
     crud_user = crud.User(tables.User, db)
     user = crud_user.get(user_id)
     if not user:
         ## ensure that the team exists before procedeeing
         raise HTTPException(status_code=400, detail="user not exists")
-    #print(user.teams)
+    #print(user.user_teams)
+    active_team_id = user.active_team_id
+    print(user.active_team_id)
     res = []
     ## convert sqlchemy model to pydantic , see https://pydantic-docs.helpmanual.io/usage/models/#orm-mode-aka-arbitrary-class-instances
-    for k, v in user.teams.items():
-        print(k, v)
-        w = schema.Team.from_orm(v).dict()
-        w['membership']=k
+    for k in user.user_teams: #.items():
+        print(k)
+        w = schema.Team.from_orm(k.team).dict()
+        print(str(w['id']), active_team_id, str(w['id']) == str(active_team_id))
+        w['membership']=k.membership
+        w['is_active']= str(w['id']) == str(active_team_id)
         print(w)
         res.append(w)
     #res = list(user.teams)

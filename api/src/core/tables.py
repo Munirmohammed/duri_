@@ -31,24 +31,24 @@ class User(Base):
     user_workspaces = relationship(
         "UserWorkspace",
         back_populates="user",
-        collection_class=attribute_mapped_collection("membership"),
+        #collection_class=attribute_mapped_collection("membership"),
         cascade="all, delete-orphan",
     )
     user_teams = relationship(
         "UserTeam",
         back_populates="user",
-        collection_class=attribute_mapped_collection("membership"),
+        #collection_class=attribute_mapped_collection("membership"),
         cascade="all, delete-orphan",
     )
     workspaces = association_proxy(
         "user_workspaces", 
         "workspace",
-        creator=lambda k, v: UserWorkspace(membership=k, workspace=v),
+        #creator=lambda k, v: UserWorkspace(membership=k, workspace=v),
     )
     teams = association_proxy(
         "user_teams", 
         "team",
-        creator=lambda k, v: UserTeam(membership=k, team=v),
+        #creator=lambda k, v: UserTeam(membership=k, team=v),
     )
 
 class Workspace(Base):
@@ -90,6 +90,7 @@ class UserWorkspace(Base):
     #user = relationship(User, backref=backref("user_workspaces"))
     user = relationship(
         User,
+        #backref=backref("user_workspaces")
         back_populates="user_workspaces",
     )
     workspace = relationship("Workspace")

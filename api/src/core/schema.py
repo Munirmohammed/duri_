@@ -146,6 +146,7 @@ class UserWorkspaceAssoc(WorkspaceBase):
     membership : str = Field(None, description="the membership type")
 
 class UserTeamAssoc(TeamBase):
+    is_active : bool = Field(False, description="if this team is the current active user team")
     membership : str = Field(None, description="the membership type")
     created_at: Optional[datetime] = Field(None, description="the actual creation date")
     updated_at: Optional[datetime] = Field(None, description="last update date")
