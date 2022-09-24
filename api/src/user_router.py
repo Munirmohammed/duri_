@@ -25,8 +25,11 @@ async def get_user_profile(
     user = crud_utils.get_user(user_id)
     #teams = crud_utils.get_user_teams(user)
     #user_profile = schema.UserBase.from_orm(user).dict()
-    #user_profile['teams'] = teams
-    return user
+    user_profile = schema.UserBase.from_orm(user).dict()
+    team = user.active_team
+    user_profile['team'] = team
+    user_profile['workspace'] = team.workspace
+    return user_profile
 
 @router.post("/user/workspace", tags=["User"])
 async def add_user_to_workspace_team(

@@ -176,7 +176,8 @@ class UserTeamAssoc(TeamBase):
 #    pass
 
 class UserProfile(UserBase):
-    active_team: Team = Field(None, description="the current active team")
+    team: TeamBase = Field(None, description="the current active team")
+    workspace: WorkspaceBase = Field(None, description="the current active workspace")
     #teams: List[UserTeamAssoc] = Field(..., description="the user teams")
 
 class PassportVisaToken(BaseModel):
