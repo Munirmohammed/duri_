@@ -31,6 +31,25 @@ async def get_user_profile(
     user_profile['workspace'] = team.workspace
     return user_profile
 
+@router.post("/user/search", response_model=schema.UserProfile, tags=["User"])
+async def search_user(
+    x_omic_userid: Union[str, None] = Header(default=None, description="the user-id from header (temporary)"),
+    email: int = Query(..., description="user email to search"),
+):
+    """
+    Search user
+    """
+    auth_user = crud_utils.get_user(user_id)
+    if not auth_user:
+        raise HTTPException(status_code=500, detail="invalid user")
+    crud_user = crud.User(tables.User, db)
+    user = crud_utils.get_by_email(email)
+    user_profile = schema.UserBase.from_orm(user).dict()
+    team = user.active_team
+    user_profile['team'] = team
+    user_profile['workspace'] = team.workspace
+    return user_profile
+
 @router.post("/user/workspace", tags=["User"])
 async def switch_user_workspace_team(
     #user_id: str = Path(..., description="the user-id"),
