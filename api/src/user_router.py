@@ -33,8 +33,8 @@ async def get_user_profile(
 
 @router.post("/user/search", response_model=schema.UserProfile, tags=["User"])
 async def search_user(
-    x_omic_userid: Union[str, None] = Header(default=None, description="the user-id from header (temporary)"),
-    email: int = Query(..., description="user email to search"),
+    x_omic_userid: str = Header(..., description="the user-id from header (temporary)"),
+    email: str = Query(..., description="user email to search"),
 ):
     """
     Search user
