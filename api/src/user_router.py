@@ -35,15 +35,16 @@ async def get_user_profile(
 async def search_user(
     x_omic_userid: str = Header(..., description="the user-id from header (temporary)"),
     email: str = Query(..., description="user email to search"),
+    db: Session = Depends(deps.get_db),
 ):
     """
     Search user
     """
-    auth_user = crud_utils.get_user(user_id)
+    auth_user = crud_utils.get_user(x_omic_userid)
     if not auth_user:
         raise HTTPException(status_code=500, detail="invalid user")
     crud_user = crud.User(tables.User, db)
-    user = crud_utils.get_by_email(email)
+    user = crud_user.get_by_email(email)
     user_profile = schema.UserBase.from_orm(user).dict()
     team = user.active_team
     user_profile['team'] = team

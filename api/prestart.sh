@@ -7,7 +7,7 @@
 #  https://stackoverflow.com/questions/35069027/docker-wait-for-postgresql-to-be-running
 #  https://docs.docker.com/compose/startup-order/
 
-sleep 15
+sleep 5
 
 alembic upgrade head
 
