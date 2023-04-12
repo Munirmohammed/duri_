@@ -1,5 +1,6 @@
 # app
 fastapi>=0.78.0
+sse-starlette
 #mangum
 aiofiles
 # db
@@ -18,3 +19,4 @@ ory-keto-client
 ## utils
 stringcase
 requests
+aio-pika

@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   api:
@@ -13,11 +13,30 @@ services:
     volumes:
       - ./api:/app
       - $HOME/.aws/credentials:/root/.aws/credentials:ro
+    environment:
+      - DEPLOYMENT=prod
     env_file:
       - .env
       - .env.db
+    depends_on:
+      - rabbitmq
     networks:
       - intranet
+      - mess
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: duri_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbitmq
+      RABBITMQ_DEFAULT_PASS: rabbitmq
+    expose:
+      - "5672"
+      - "15672"
+    ports:
+      - "15673:15672"
+    networks:
+      - mess
 networks:
   intranet: {}
+  mess: {}
