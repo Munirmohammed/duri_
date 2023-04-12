@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 ## Notes
 ##  - restart-policy : https://docs.docker.com/config/containers/start-containers-automatically/
@@ -15,14 +15,18 @@ services:
     volumes:
       - ./api:/app
       - $HOME/.aws/credentials:/root/.aws/credentials:ro
+    environment:
+      - DEPLOYMENT=local
     env_file:
       - .env
       - .env.dev.db
     depends_on:
       - db
+      - rabbitmq
     networks:
       - db
       - intranet
+      - api
 
   keto:
     image: oryd/keto:v0.8.0-alpha.2
@@ -43,7 +47,7 @@ services:
     environment:
       - LOG_LEVEL=debug
       - DSN=postgresql://postgres:secret@keto-db:5432/accesscontroldb?sslmode=disable
-  
+
   keto-db:
     image: postgres:12-alpine
     #ports:
@@ -60,7 +64,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-  
+
   db:
     image: postgres:12-alpine
     environment:
@@ -99,10 +103,25 @@ services:
     logging:
       driver: none
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: duri_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbitmq
+      RABBITMQ_DEFAULT_PASS: rabbitmq
+    expose:
+      - "5672"
+      - "15672"
+    ports:
+      - "15673:15672"
+    networks:
+      - api
+
 networks:
   db: {}
   intranet: {}
   keto_db: {}
+  api: {}
 
 volumes:
   postgres:

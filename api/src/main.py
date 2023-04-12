@@ -8,25 +8,23 @@ from .routes import router as api_router
 from .auth_router import router as auth_router
 from .workspace_router import router as workspace_router
 from .user_router import router as user_router
-
+import asyncio
+import requests
 
 app = FastAPI(
     title=settings.api_name,
     description=settings.api_description,
     version=settings.api_version,
 )
-
+   
 @app.on_event("startup")
-def startup():
-    print('startup')
-    ## NOTE: -  we now migrate via calling /workspace endpoint during post-deployment , see make import
-    ### migrate.migrate_workspaces() ## NOTE: activate this function when deploying
-    
+async def startup():
+    pass
 
 @app.on_event("shutdown")
 async def shutdown():
-    print('shutdown')
-
+    pass
+ 
 @app.get("/",)
 def main():
     return RedirectResponse(url="/docs/")
