@@ -42,9 +42,11 @@ async def search_user(
     """
     auth_user = crud_utils.get_user(x_omic_userid)
     if not auth_user:
-        raise HTTPException(status_code=500, detail="invalid user")
+        raise HTTPException(status_code=400, detail="invalid authetication")
     crud_user = crud.User(tables.User, db)
     user = crud_user.get_by_email(email)
+    if not user:
+        raise HTTPException(status_code=404, detail="not found")
     user_profile = schema.UserBase.from_orm(user).dict()
     team = user.active_team
     user_profile['team'] = team

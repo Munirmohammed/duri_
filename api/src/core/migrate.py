@@ -29,4 +29,5 @@ def migrate_workspaces():
                 )
                 db.add(db_obj)
                 db.commit()
+    db.close()
 

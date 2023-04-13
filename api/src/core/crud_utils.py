@@ -30,6 +30,7 @@ def get_user(user_id: str) -> tables.User:
             'updated_at': cognito_user['UserLastModifiedDate'] ,
         }
         user = crud_user.create(db_obj)
+    db.close()
     if not user:
         raise HTTPException(status_code=400, detail="user not exists")
     return user
