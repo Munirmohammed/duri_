@@ -24,7 +24,7 @@ def get_db_url():
 def make_engine():
     db_url = get_db_url()
     print('connecting to => ', db_url)
-    return create_engine(db_url, echo=False, pool_pre_ping=True, pool_size=10, max_overflow=20)
+    return create_engine(db_url, echo=False, pool_pre_ping=True, pool_size=100, max_overflow=150)
 
 engine = make_engine()
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

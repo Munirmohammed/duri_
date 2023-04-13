@@ -22,7 +22,7 @@ services:
       - rabbitmq
     networks:
       - intranet
-      - mess
+      - api
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -36,7 +36,8 @@ services:
     ports:
       - "15673:15672"
     networks:
-      - mess
+      - api
+
 networks:
   intranet: {}
-  mess: {}
+  api: {}
