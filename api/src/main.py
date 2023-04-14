@@ -1,5 +1,6 @@
 #from mangum import Mangum
 from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from .core import  deps ##, migrate
@@ -12,22 +13,33 @@ import asyncio
 import requests
 
 app = FastAPI(
-    title=settings.api_name,
-    description=settings.api_description,
-    version=settings.api_version,
+	title=settings.api_name,
+	description=settings.api_description,
+	version=settings.api_version,
 )
-   
+
+origins = [
+	"*",
+]
+
+app.add_middleware(
+	CORSMiddleware,
+	allow_origins=origins,
+	allow_methods=["GET", "POST"],
+	allow_headers=["*"],
+)
+
 @app.on_event("startup")
 async def startup():
-    pass
+	pass
 
 @app.on_event("shutdown")
 async def shutdown():
-    pass
- 
+	pass
+
 @app.get("/",)
 def main():
-    return RedirectResponse(url="/docs/")
+	return RedirectResponse(url="/docs/")
 
 app.include_router(api_router) # prefix=settings.API_V1_STR
 app.include_router(auth_router)
