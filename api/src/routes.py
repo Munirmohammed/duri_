@@ -46,6 +46,6 @@ async def service_info():
 @router.get("/stream")
 async def stream_mess(
     request: Request,
-    user: schema.UserProfile = Depends(common.user_from_header)
+    user: schema.UserProfile = Depends(common.user_from_query)
 ):
     return EventSourceResponse(generate_sse(request, user))
