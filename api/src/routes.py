@@ -20,7 +20,7 @@ async def generate_sse(request,user):
     )
     channel = await connection.channel()
     result = await channel.declare_queue('', exclusive=True)
-    exchange_name = user['workspace']['id']
+    exchange_name = user['workspace'].id
     exchange = await channel.declare_exchange(str(exchange_name), aio_pika.ExchangeType.TOPIC)
     await result.bind(exchange, routing_key="notification")
     async with result.iterator() as queue_iter:
