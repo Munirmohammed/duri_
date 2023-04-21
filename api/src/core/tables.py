@@ -119,3 +119,11 @@ class UserTeam(Base):
         self.team_id = team_id
         self.membership = membership
         self.created_at = created_at """
+
+class Notification(Base):
+    __tablename__ = "notification"
+    id = Column(UUID(as_uuid=True), unique=True, nullable=False, primary_key=True,  default=uuid4)
+    data = Column(JSON, nullable=False)
+    workspace_id = Column(UUID(as_uuid=True), ForeignKey('workspace.id'), nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+    

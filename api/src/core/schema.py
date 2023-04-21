@@ -172,6 +172,13 @@ class UserTeamAssoc(TeamBase):
     updated_at: Optional[datetime] = Field(None, description="last update date")
     #workspace : WorkspaceMini = Field(None, description="the workspace")
 
+class Notification(BaseModel):
+    data: Dict[str, Any] = Field(..., description="message")
+    workspace_id: Union[UUID4, str] = Field(..., description="workspace id")
+    created_at: Optional[datetime] = Field(None, description="the actual creation date")
+    class Config:
+        orm_mode = True
+
 #class GetUserWorkspace(UserWorkspace):
 #    pass
 
