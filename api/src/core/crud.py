@@ -5,7 +5,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.dialects import postgresql as pg
 from . import schema, tables
 from .crud_base import CRUDBase
-
+from sqlalchemy import desc
 
 class User(CRUDBase):
 	def get_by_username(self, username: str) -> tables.User:
@@ -78,3 +78,9 @@ class UserTeam(CRUDBase):
 		else:
 			query = query.order_by(db_model.created_at.asc()).offset(skip)
 			return query.limit(limit).all()
+	
+class Notification(CRUDBase):
+	def get_latest(self):
+		db = self.db
+		db_model = self.model
+		return db.query(db_model).order_by(desc(db_model.created_at)).limit(20).all()
