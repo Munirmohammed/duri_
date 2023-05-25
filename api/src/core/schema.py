@@ -172,13 +172,6 @@ class UserTeamAssoc(TeamBase):
     updated_at: Optional[datetime] = Field(None, description="last update date")
     #workspace : WorkspaceMini = Field(None, description="the workspace")
 
-class Notification(BaseModel):
-    data: Dict[str, Any] = Field(..., description="message")
-    workspace_id: Union[UUID4, str] = Field(..., description="workspace id")
-    created_at: Optional[datetime] = Field(None, description="the actual creation date")
-    class Config:
-        orm_mode = True
-
 #class GetUserWorkspace(UserWorkspace):
 #    pass
 
@@ -200,3 +193,35 @@ class PassportVisaToken(BaseModel):
     iat: int = Field(..., description='date-time when token was issued')
     exp: int = Field(..., description='date-time for token expiration')
     #ga4gh_visa_v1: Optional[List[Dict[str, Any]]] = Field(None, description='an list map of Passport Claims see https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md#passport-claim-format')
+
+class Notification(BaseModel):
+    data: Dict[str, Any] = Field(..., description="message")
+    workspace_id: Union[UUID4, str] = Field(..., description="workspace id")
+    created_at: Optional[datetime] = Field(None, description="the actual creation date")
+    class Config:
+        orm_mode = True
+
+class ResourceBase(BaseModel):
+    id: Union[UUID4, str] = Field(..., description="resource id")
+    name: str = Field(..., description="resource name")
+    type: str = Field(..., description="resource type")
+    provider: str = Field(..., description="resource provider") # premi
+    # name: Dict[str, Any] = Field(..., description="message")
+    created_at: Optional[datetime] = Field(None, description="the creation date")
+    class Config:
+        orm_mode = True
+
+class Resource(ResourceBase):
+    pass
+
+class ResourceForm(BaseModel):
+    name: str
+    type: str
+    provider: str
+    meta: Dict[str,Any]
+
+class CredentialsForm(BaseModel):
+    resource_id: str
+    type: str
+    store: bytes
+

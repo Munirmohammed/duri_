@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     #command: "./dev_start.sh"
     restart: on-failure
-    privileged: yes
+    #privileged: yes
     ports:
       - "9041:5000"
     volumes:

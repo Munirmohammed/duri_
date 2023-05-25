@@ -9,7 +9,7 @@ from starlette.status import HTTP_403_FORBIDDEN
 from sqlalchemy.orm import Session
 from .core import  deps, schema, crud, tables
 from .core.config import settings
-from .services import cognito
+from .services import cognito, gitea
 
 router = APIRouter()
 
@@ -126,6 +126,11 @@ async def create_workspace(
         }
         user_team = crud_user_team.create(user_team_obj)
     print('user.active_team', user.active_team_id)
+    org = gitea.gitea.get_or_create_org(group_name)
+    print(org)
+    team = gitea.get_or_create_team(org['name'], settings.default_team, settings.default_team_description)
+    print(team)
+    gitea.gitea.add_user_to_team(team['id'], user.username)
     if not user.active_team_id:
         crud_user.set_active_team(user_id, team_id)
     return workspace
