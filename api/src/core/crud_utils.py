@@ -5,8 +5,7 @@ from src.services import cognito
 from src.core import tables, deps, crud, schema
 
 
-def get_user(user_id: str) -> tables.User:
-    db = next(deps.get_db())
+def get_user(db: Session, user_id: str) -> tables.User:
     crud_user = crud.User(tables.User, db)
     user = crud_user.get(user_id)
     if not user:
@@ -30,7 +29,6 @@ def get_user(user_id: str) -> tables.User:
             'updated_at': cognito_user['UserLastModifiedDate'] ,
         }
         user = crud_user.create(db_obj)
-    #db.close()
     if not user:
         raise HTTPException(status_code=400, detail="user not exists")
     return user

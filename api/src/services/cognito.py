@@ -6,7 +6,7 @@ import base64
 import json
 from src.core.config import settings
 from src import utils
-
+from src.services.gitea import gitea
 #boto3.set_stream_logger('')
 
 USER_POOL_REGION = settings.user_pool_region
@@ -165,10 +165,26 @@ def create_user(username, email, first_name, last_name):
                 )
         password = utils.id_generator(12)
         r, e = set_user_password(username, password, True)
+        gitea.get_or_create_user(email, username, password, f'{first_name} {last_name}')
+        resource = {
+            "name": "omic_git",
+            "type": "service",
+            "provider": "gitea",
+            "meta": {}
+        }
+        cred = {
+            "type": "service",
+            "store": {
+                "username": username,
+                "email": email,
+                "password": password
+            }
+        }
+        compute = (resource, cred)
         print(r, e)
     except Exception as e:
-        return None, e.__str__()
-    return resp, None
+        return None, e.__str__(), None
+    return resp, None, compute
 
 def create_group(name, description):
     """ 

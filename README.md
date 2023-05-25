@@ -5,7 +5,7 @@ An implementation of [ga4gh-duri](https://github.com/ga4gh-duri/ga4gh-duri.githu
 ## Services Overview
 
 1. cognito  : user identity pool service
-2. [ory-keto](https://www.ory.sh/docs/keto) : access-control engine
+2. [ory-keto](https://www.ory.sh/docs/keto) : access-control engine [TODO]
 
 ## Documentation : 
 
@@ -37,7 +37,7 @@ An IAM based permission RBAC-style role-permission model managed by [ory-keto](h
 
 **_Notes:_**
 
-- the api does not store user access controls this is managed via internal tool [ory-keto](https://www.ory.sh/docs/keto) which it communicates via its http rest api internally.
+- the api does not store user access credentials this is managed via internal tool [ory-keto](https://www.ory.sh/docs/keto) which it communicates via its http rest api internally.
 - the request/responce of permissions will be based on ketos _[relation-tupples](https://www.ory.sh/docs/keto/concepts/relation-tuples)_ , _[namespaces](https://www.ory.sh/docs/keto/concepts/namespaces)_ , _[objects](https://www.ory.sh/docs/keto/concepts/objects)_ and _[subject](https://www.ory.sh/docs/keto/concepts/subjects)_ concepts using ketos rest-api schema see [keto-rest-api](https://www.ory.sh/docs/keto/reference/rest-api)  for more details on see keto concepts [overview](https://www.ory.sh/docs/keto/concepts/api-overview)
 
 **_Logic:_**

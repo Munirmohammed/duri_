@@ -6,7 +6,6 @@ aiofiles
 # db
 psycopg2-binary
 SQLAlchemy
-#databases[postgresql]
 # file requests
 python-multipart
 # aws
@@ -15,7 +14,7 @@ boto3
 pyjwt[crypto]
 #python-jose[cryptography]
 ## permisions
-ory-keto-client
+#ory-keto-client
 ## utils
 stringcase
 requests

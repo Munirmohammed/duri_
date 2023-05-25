@@ -17,12 +17,13 @@ router = APIRouter()
 @router.post("/user/profile", response_model=schema.UserProfile, tags=["User"])
 async def get_user_profile(
     x_omic_userid: Union[str, None] = Header(default=None, description="the user-id from header (temporary)"),
+    db: Session = Depends(deps.get_db),
 ):
     """
     Get user profile
     """
     user_id = x_omic_userid
-    user = crud_utils.get_user(user_id)
+    user = crud_utils.get_user(db, user_id)
     #teams = crud_utils.get_user_teams(user)
     #user_profile = schema.UserBase.from_orm(user).dict()
     user_profile = schema.UserBase.from_orm(user).dict()
@@ -40,7 +41,7 @@ async def search_user(
     """
     Search user
     """
-    auth_user = crud_utils.get_user(x_omic_userid)
+    auth_user = crud_utils.get_user(db, x_omic_userid)
     if not auth_user:
         raise HTTPException(status_code=400, detail="invalid authetication")
     crud_user = crud.User(tables.User, db)
@@ -83,7 +84,7 @@ async def switch_user_workspace_team(
     if not membership:
         team = settings.default_membership_type
 
-    user = crud_utils.get_user(x_omic_userid)
+    user = crud_utils.get_user(db, x_omic_userid)
     user_id = user.id
     username = user.username
     workspace_obj = crud_workspace.get_by_name(workspace)
@@ -141,7 +142,7 @@ async def list_user_workspaces(
     """
     List workspaces a user belongs to
     """
-    user = crud_utils.get_user(x_omic_userid)
+    user = crud_utils.get_user(db, x_omic_userid)
     user_workspaces = crud_utils.get_user_workspaces(user)
     return user_workspaces
     
@@ -154,6 +155,6 @@ async def get_user_teams(
     """
     List teams a user belongs to
     """
-    user = crud_utils.get_user(x_omic_userid)
+    user = crud_utils.get_user(db, x_omic_userid)
     user_teams = crud_utils.get_user_teams(user)
     return user_teams

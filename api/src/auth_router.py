@@ -22,14 +22,32 @@ async def register(
     first_name: str = Form(..., description="user first name"),
     last_name: str = Form(..., description="user last name"),
     bio: Optional[str] = Form(None, description="user last name"),
+    db: Session = Depends(deps.get_db)
 ):
     """
     Registers a new user
     """
-    res, err = cognito.create_user(username, email, first_name, last_name)
+    res, err, compute = cognito.create_user(username, email, first_name, last_name)
     print(res, err)
     if err :
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail='registration error')
+    crud_resource = crud.Resource(tables.Resource, db)
+    crud_cred = crud.Credential(tables.Credential, db)
+    resource, cred = compute
+    obj = schema.ResourceForm(
+        name= resource['name'],
+        type= resource['type'],
+        provider= resource['provider'],
+        meta= resource['meta']
+    )
+    resource = crud_resource.create(obj)
+    if resource:
+        cred_obj = {
+            "resource_id": resource.id,
+            "type": resource['type'],
+            "store": cred['store']
+        }
+        crud_cred.create(cred_obj)
     return res
 
 @router.post("/login", tags=["Auth"])
