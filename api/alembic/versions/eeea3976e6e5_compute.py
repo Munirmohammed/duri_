@@ -21,7 +21,8 @@ def upgrade():
     op.create_table(
 		"resource",
 		sa.Column("id", UUID(as_uuid=True), unique=True, nullable=False, primary_key=True, server_default=text("uuid_generate_v4()")),
-		sa.Column('workspace_id', UUID(as_uuid=True), sa.ForeignKey('workspace.id'), nullable=False),
+		#sa.Column('workspace_id', UUID(as_uuid=True), sa.ForeignKey('workspace.id'), nullable=False),
+        sa.Column('user_id', UUID(as_uuid=True), sa.ForeignKey('user.id'), nullable=False),
         sa.Column("name", sa.String(), nullable=False, comment="user provided name of this resource"), 
         sa.Column("type", sa.String(), nullable=False, comment="resource-type one of compute | service |  "), 
         #sa.Column("subtype", sa.String(), nullable=False, comment="resource-sub-type, ie git, server,  "),  ## TODO

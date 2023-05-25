@@ -17,6 +17,7 @@ services:
       - $HOME/.aws/credentials:/root/.aws/credentials:ro
     environment:
       - DEPLOYMENT=local
+      - GITEA_TOKEN=d0fdc2e6c1f698a2e3e9eb330baff89f74add14f
     env_file:
       - .env
       - .env.dev.db
