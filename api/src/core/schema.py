@@ -24,7 +24,6 @@ class ServiceInfo(BaseModel):
     documentationUrl: str
     environment: str
     version: str
-
     class Config:
         schema_extra = {
             "example": {
@@ -74,35 +73,42 @@ service_info_response = {
     "version": "2.0.0"
 }
 
-
 class WorkspaceBaseMini(BaseModel):
     id: Union[UUID4, str] = Field(..., description="id of the workspace")
     name: str = Field(..., description="name of the workspace")
-    description: Optional[str] = Field(None, description="description of the workspace")
-    active: bool = Field(..., description="if the workspace is active or disabled")
+    description: Optional[str] = Field(
+        None, description="description of the workspace")
+    active: bool = Field(...,
+                         description="if the workspace is active or disabled")
     class Config:
         orm_mode = True
 
 class WorkspaceBase(WorkspaceBaseMini):
-    #active: bool = Field(..., description="if the workspace is active or disabled")
-    #description: Optional[str] = Field(None, description="description of the workspace")
-    avatar: Optional[str] = Field(None, description="link to the workspace logo image")
+    # active: bool = Field(..., description="if the workspace is active or disabled")
+    # description: Optional[str] = Field(None, description="description of the workspace")
+    avatar: Optional[str] = Field(
+        None, description="link to the workspace logo image")
     tags: Optional[List[str]] = Field(None, description="tag lebels")
-    ui_customization: Optional[Dict[str, Any]] = Field(None, description="an object of ui customizable items for ui ie. the object would have entry `background_image` for background image of the cards")
-    #created_at: Optional[datetime] = Field(None, description="the actual creation date")
-    #updated_at: Optional[datetime] = Field(None, description="last update date")
-    
+    ui_customization: Optional[Dict[str, Any]] = Field(
+        None, description="an object of ui customizable items for ui ie. the object would have entry `background_image` for background image of the cards")
+    # created_at: Optional[datetime] = Field(None, description="the actual creation date")
+    # updated_at: Optional[datetime] = Field(None, description="last update date")
 
 class TeamBase(BaseModel):
     id: Union[UUID4, str] = Field(..., description="id of the team")
     name: str = Field(..., description="name of the team")
     active: bool = Field(..., description="if the team is active or disabled")
-    description: Optional[str] = Field(None, description="description of the team")
-    avatar: Optional[str] = Field(None, description="link to the team logo image")
+    description: Optional[str] = Field(
+        None, description="description of the team")
+    avatar: Optional[str] = Field(
+        None, description="link to the team logo image")
     tags: Optional[List[str]] = Field(None, description="tag lebels")
-    ui_customization: Optional[Dict[str, Any]] = Field(None, description="an object of ui customizable items for ui ie. the object would have entry `background_image` for background image of the cards")
-    created_at: Optional[datetime] = Field(None, description="the actual creation date")
-    updated_at: Optional[datetime] = Field(None, description="last update date")
+    ui_customization: Optional[Dict[str, Any]] = Field(
+        None, description="an object of ui customizable items for ui ie. the object would have entry `background_image` for background image of the cards")
+    created_at: Optional[datetime] = Field(
+        None, description="the actual creation date")
+    updated_at: Optional[datetime] = Field(
+        None, description="last update date")
     class Config:
         orm_mode = True
 
@@ -110,75 +116,94 @@ class UserBase(BaseModel):
     id: Union[UUID4, str] = Field(..., description="id of the user")
     email: str = Field(..., description="user email")
     username: str = Field(..., description="user username")
-    #active_team_id: Optional[Union[UUID4, str]] = Field(None, description="the current active team id")
-    created_at: Optional[datetime] = Field(None, description="the actual creation date")
-    updated_at: Optional[datetime] = Field(None, description="last update date")
+    # active_team_id: Optional[Union[UUID4, str]] = Field(None, description="the current active team id")
+    created_at: Optional[datetime] = Field(
+        None, description="the actual creation date")
+    updated_at: Optional[datetime] = Field(
+        None, description="last update date")
     class Config:
         orm_mode = True
-
 
 class TeamInsert(BaseModel):
     name: str = Field(..., description="name of the team")
     workspace_id: Union[UUID4, str] = Field(..., description="workspace id")
     creator_id: Union[UUID4, str] = Field(..., description="the owner user-id")
     active: bool = Field(..., description="if the team is active or disabled")
-    description: Optional[str] = Field(None, description="description of the team")
-    avatar: Optional[str] = Field(None, description="link to the team logo image")
+    description: Optional[str] = Field(
+        None, description="description of the team")
+    avatar: Optional[str] = Field(
+        None, description="link to the team logo image")
     tags: Optional[List[str]] = Field(None, description="tag lebels")
-    ui_customization: Optional[Dict[str, Any]] = Field(None, description="an object of ui customizable items for ui ie. the object would have entry `background_image` for background image of the cards")
+    ui_customization: Optional[Dict[str, Any]] = Field(
+        None, description="an object of ui customizable items for ui ie. the object would have entry `background_image` for background image of the cards")
     class Config:
         orm_mode = True
 
 class WorkspaceMini(WorkspaceBase):
-    created_at: Optional[datetime] = Field(None, description="the actual creation date")
-    updated_at: Optional[datetime] = Field(None, description="last update date")
+    created_at: Optional[datetime] = Field(
+        None, description="the actual creation date")
+    updated_at: Optional[datetime] = Field(
+        None, description="last update date")
 
 class Workspace(WorkspaceBase):
-    teams : List[TeamBase] = Field(None, description="this workspace teams")
-    created_at: Optional[datetime] = Field(None, description="the actual creation date")
-    updated_at: Optional[datetime] = Field(None, description="last update date")
+    teams: List[TeamBase] = Field(None, description="this workspace teams")
+    created_at: Optional[datetime] = Field(
+        None, description="the actual creation date")
+    updated_at: Optional[datetime] = Field(
+        None, description="last update date")
 
 class TeamMini(TeamBase):
-    created_at: Optional[datetime] = Field(None, description="the actual creation date")
-    updated_at: Optional[datetime] = Field(None, description="last update date")
-    
+    created_at: Optional[datetime] = Field(
+        None, description="the actual creation date")
+    updated_at: Optional[datetime] = Field(
+        None, description="last update date")
+
 class Team(TeamMini):
-    workspace : WorkspaceBaseMini = Field(None, description="the workspace")
+    workspace: WorkspaceBaseMini = Field(None, description="the workspace")
 
 class UserWorkspace(BaseModel):
-    user_id : Union[UUID4, str] = Field(None, description="the user_id")
-    workspace_id: Union[UUID4, str] = Field(None, description="the workspace id")
+    user_id: Union[UUID4, str] = Field(None, description="the user_id")
+    workspace_id: Union[UUID4, str] = Field(
+        None, description="the workspace id")
     membership: str = Field(None, description="the workspace membership")
-    created_at: Optional[datetime] = Field(None, description="the creation date")
+    created_at: Optional[datetime] = Field(
+        None, description="the creation date")
     class Config:
         orm_mode = True
+
 class UserTeam(BaseModel):
-    user_id : Union[UUID4, str] = Field(None, description="the user_id")
-    workspace_id: Union[UUID4, str] = Field(None, description="the workspace id")
+    user_id: Union[UUID4, str] = Field(None, description="the user_id")
+    workspace_id: Union[UUID4, str] = Field(
+        None, description="the workspace id")
     team_id: Union[UUID4, str] = Field(None, description="the team id")
     membership: str = Field(None, description="the team membership")
-    created_at: Optional[datetime] = Field(None, description="the creation date")
+    created_at: Optional[datetime] = Field(
+        None, description="the creation date")
     class Config:
         orm_mode = True
 
 class UserWorkspaceAssoc(WorkspaceBase):
-    membership : str = Field(None, description="the membership type")
+    membership: str = Field(None, description="the membership type")
 
 class UserTeamAssoc(TeamBase):
-    is_active : bool = Field(False, description="if this team is the current active user team")
-    membership : str = Field(None, description="the membership type")
-    workspace : str = Field(None, description="the workspace name")
-    created_at: Optional[datetime] = Field(None, description="the actual creation date")
-    updated_at: Optional[datetime] = Field(None, description="last update date")
-    #workspace : WorkspaceMini = Field(None, description="the workspace")
+    is_active: bool = Field(
+        False, description="if this team is the current active user team")
+    membership: str = Field(None, description="the membership type")
+    workspace: str = Field(None, description="the workspace name")
+    created_at: Optional[datetime] = Field(
+        None, description="the actual creation date")
+    updated_at: Optional[datetime] = Field(
+        None, description="last update date")
+    # workspace : WorkspaceMini = Field(None, description="the workspace")
 
-#class GetUserWorkspace(UserWorkspace):
+# class GetUserWorkspace(UserWorkspace):
 #    pass
 
 class UserProfile(UserBase):
     team: TeamBase = Field(None, description="the current active team")
-    workspace: WorkspaceBase = Field(None, description="the current active workspace")
-    #teams: List[UserTeamAssoc] = Field(..., description="the user teams")
+    workspace: WorkspaceBase = Field(
+        None, description="the current active workspace")
+    # teams: List[UserTeamAssoc] = Field(..., description="the user teams")
 
 class PassportVisaToken(BaseModel):
     """
@@ -192,12 +217,14 @@ class PassportVisaToken(BaseModel):
     email: str = Field(..., description='the user email address')
     iat: int = Field(..., description='date-time when token was issued')
     exp: int = Field(..., description='date-time for token expiration')
-    #ga4gh_visa_v1: Optional[List[Dict[str, Any]]] = Field(None, description='an list map of Passport Claims see https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md#passport-claim-format')
+    # ga4gh_visa_v1: Optional[List[Dict[str, Any]]] = Field(None, description='an list map of Passport Claims see https://github.com/ga4gh-duri/ga4gh-duri.github.io/blob/master/researcher_ids/ga4gh_passport_v1.md#passport-claim-format')
 
 class Notification(BaseModel):
     data: Dict[str, Any] = Field(..., description="message")
     workspace_id: Union[UUID4, str] = Field(..., description="workspace id")
-    created_at: Optional[datetime] = Field(None, description="the actual creation date")
+    created_at: Optional[datetime] = Field(
+        None, description="the actual creation date")
+
     class Config:
         orm_mode = True
 
@@ -205,9 +232,11 @@ class ResourceBase(BaseModel):
     id: Union[UUID4, str] = Field(..., description="resource id")
     name: str = Field(..., description="resource name")
     type: str = Field(..., description="resource type")
-    provider: str = Field(..., description="resource provider") # premi
+    provider: str = Field(..., description="resource provider")  # premi
     # name: Dict[str, Any] = Field(..., description="message")
-    created_at: Optional[datetime] = Field(None, description="the creation date")
+    created_at: Optional[datetime] = Field(
+        None, description="the creation date")
+
     class Config:
         orm_mode = True
 
@@ -218,10 +247,30 @@ class ResourceForm(BaseModel):
     name: str
     type: str
     provider: str
-    meta: Dict[str,Any]
+    user_id: Union[str,UUID4]
+    meta: Dict[str, Any]
 
 class CredentialsForm(BaseModel):
-    resource_id: str
+    resource_id: Union[str, UUID4]
     type: str
     store: bytes
 
+class ComputeType(str, Enum):
+    service = 'service'
+    compute = 'compute'
+
+class ProviderType(str, Enum):
+    aws = 'aws'
+    k8s = 'k8s'
+    gitlab = 'gitlab'
+    github = 'github'
+
+class GitCredsDataSchema(BaseModel):
+    access_token: str
+
+class AwsSecretDataSchema(BaseModel):
+    access_key: str
+    secret_key: str
+class AwsCrossAccountDataSchema(BaseModel):
+    external_id: str
+    role_arn: str
