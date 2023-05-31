@@ -1,6 +1,6 @@
 from datetime import datetime
 from email.policy import default
-from sqlalchemy import Table, Column, Integer, BigInteger, String, ForeignKey, DateTime, JSON, TEXT, Boolean, LargeBinary
+from sqlalchemy import Table, Column, Integer, BigInteger, String, ForeignKey, DateTime, JSON, TEXT, Boolean, Text
 from sqlalchemy.orm import relationship, backref, synonym
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm.collections import attribute_mapped_collection
@@ -153,7 +153,7 @@ class Credential(Base):
 	# name = Column(String, nullable=False)
 	type = Column(String, nullable=False)
 	#config = Column(JSON, nullable=False)
-	store = Column(LargeBinary, nullable=False)
+	store = Column(Text, nullable=False)
 	created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
 	updated_at = Column(DateTime(timezone=True), nullable=True)
 	

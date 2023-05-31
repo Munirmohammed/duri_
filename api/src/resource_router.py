@@ -77,6 +77,7 @@ async def create_resource(
                 access_key_id, secret_access_key, session_token)
         meta['services'] = services
     # resources = crud_resource.filter_by(workspace_id=workspace.id)
+    cred_string = json.dumps(cred)
     obj = schema.ResourceForm(
         name=name,
         type=type.value,
@@ -89,7 +90,7 @@ async def create_resource(
         cred_obj = schema.CredentialsForm(
             resource_id= resource.id,
             type= type.value,
-            store= cred
+            store= cred_string
         )
         crud_credential.create(cred_obj)
     return resource.id

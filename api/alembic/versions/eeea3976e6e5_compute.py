@@ -39,7 +39,7 @@ def upgrade():
 		sa.Column('resource_id', UUID(as_uuid=True), sa.ForeignKey('resource.id'), nullable=False),
         sa.Column("type", sa.String(), nullable=False, comment="the credetials type, ssh, keystore, access_key, plain"), ## TODO 
         #sa.Column("config", sa.JSON(), nullable=False, comment="the credetials store"), ## TODO we need to encrypt this or use a secure secret store like aws secret manager
-        sa.Column("store", sa.LargeBinary(), nullable=False, comment="the credetials store"), ## TODO we need to encrypt this or use a secure secret store like aws secret manager
+        sa.Column("store", sa.Text(), nullable=False, comment="the credetials store"), ## TODO we need to encrypt this or use a secure secret store like aws secret manager
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=func.now()),
         sa.Column("updated_at", sa.DateTime(timezone=True),  nullable=True, ),
     )
