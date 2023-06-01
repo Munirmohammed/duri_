@@ -22,9 +22,8 @@ async def list_resources(
     """
     List all available resources of the user workspace
     """
-    workspace = auth_user.workspace
     crud_resource = crud.Resource(tables.Resource, db)
-    resources = crud_resource.filter_by(workspace_id=workspace.id)
+    resources = crud_resource.filter_by(user_id=auth_user.id)
     return resources
 
 

@@ -86,12 +86,12 @@ class Notification(CRUDBase):
 		return db.query(db_model).order_by(desc(db_model.created_at)).limit(20).all()
 
 class Resource(CRUDBase):
-	def filter_by(self, workspace_id: str = None, skip: int = 0, limit: int = 50) -> Optional[List]:
+	def filter_by(self, user_id: str = None, skip: int = 0, limit: int = 50) -> Optional[List]:
 		db = self.db
 		db_model = self.model
 		query = db.query(db_model)
-		if workspace_id:
-			query = query.filter(db_model.workspace_id == workspace_id)
+		if user_id:
+			query = query.filter(db_model.user_id == user_id)
 			
 		if limit == 1:
 			return query.first()
