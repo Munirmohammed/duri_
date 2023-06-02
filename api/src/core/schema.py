@@ -24,6 +24,7 @@ class ServiceInfo(BaseModel):
     documentationUrl: str
     environment: str
     version: str
+    
     class Config:
         schema_extra = {
             "example": {
@@ -240,9 +241,23 @@ class ResourceBase(BaseModel):
     class Config:
         orm_mode = True
 
+class CredentialBase(BaseModel):
+    id: Union[UUID4, str] = Field(..., description="resource id")
+    resource_id: Union[UUID4, str] = Field(..., description="resource id")
+    type: str
+    store: str
+    created_at: Optional[datetime] = Field(
+        None, description="the creation date")
+    
+    class Config:
+        orm_mode = True
+    
 class Resource(ResourceBase):
     pass
 
+class ResourceCred(ResourceBase):
+    credential: CredentialBase
+    
 class ResourceForm(BaseModel):
     name: str
     type: str
