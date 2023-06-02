@@ -26,6 +26,17 @@ async def list_resources(
     resources = crud_resource.filter_by(user_id=auth_user.id)
     return resources
 
+@router.get("/cred", response_model = List[schema.ResourceCred], tags=["Private"], include_in_schema=False)
+async def get_cred(
+    auth_user: schema.UserProfile = Depends(deps.user_from_header),
+    db: Session = Depends(deps.get_db),
+):
+    """
+    List all available resources of the user workspace
+    """
+    crud_resource = crud.Resource(tables.Resource, db)
+    resources = crud_resource.filter_by(user_id=auth_user.id)
+    return resources
 
 @router.post("/resource")
 async def create_resource(
@@ -35,7 +46,7 @@ async def create_resource(
     provider: schema.ProviderType = Form(
         schema.ProviderType.gitlab, description="provider of resource"),
     data: Json[Dict[str, Any]] = Form(...,
-                                           description="if the resource is gitlab/github include a 'git_creds' key in the data and an 'access_token' key inside the 'git_creds' if the resource is aws include an 'aws_secret' key in data and specify the options as 'client_secret' and 'cross_account', if 'client_secret' make sure to pass 'access_key' and 'secret_key' and if 'cross_account' pass 'external_id' and 'role_arn'"),
+                                      description="if the resource is gitlab/github include a 'git_creds' key in the data and an 'access_token' key inside the 'git_creds' if the resource is aws include an 'aws_secret' key in data and specify the options as 'client_secret' and 'cross_account', if 'client_secret' make sure to pass 'access_key' and 'secret_key' and if 'cross_account' pass 'external_id' and 'role_arn'"),
     meta: Json[Dict[str, Any]] = Form(..., description='key-value pair'),
     db: Session = Depends(deps.get_db),
 ):
