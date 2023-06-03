@@ -15,6 +15,8 @@ services:
     volumes:
       - ./api:/app
       - $HOME/.aws/credentials:/root/.aws/credentials:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /ziv/shared/bio_gpt:/ziv/shared/bio_gpt
     environment:
       - DEPLOYMENT=local
       - GITEA_TOKEN=d0fdc2e6c1f698a2e3e9eb330baff89f74add14f
@@ -77,6 +79,14 @@ services:
       - "15672"
     ports:
       - "15673:15672"
+    networks:
+      - api
+  
+  redis:
+    image: "redis/redis-stack:latest"
+    hostname: redis
+    ports:
+      - "18001:8001"
     networks:
       - api
 

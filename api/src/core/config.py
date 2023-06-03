@@ -23,4 +23,13 @@ class Settings(BaseSettings):
     duri_api_host:str="http://nucleus.omic.ai:9041"
     gitea_token: str
     duri_ampq:str = 'amqp://rabbitmq:rabbitmq@duri_rabbitmq:5672'
+    biogpt_image:str = 'biogpt:v0.0.1'
+    biogpt_workdir:str = '/ziv/shared/bio_gpt'
+    redis_host:str = 'redis:6379'
+    openai_key:str = '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'
+    serper_key:str = 'a775ccbe10558aa7cb716819817fe8232ba47ae9'
+    weaviate_url:str = 'http://ec2-3-145-17-85.us-east-2.compute.amazonaws.com:8080'
+
 settings = Settings()
+
+os.environ['REDIS_OM_URL'] = f"redis://{settings.redis_host}"

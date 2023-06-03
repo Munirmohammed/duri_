@@ -157,3 +157,35 @@ class Credential(Base):
 	created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
 	updated_at = Column(DateTime(timezone=True), nullable=True)
 	
+class Project(Base):
+	__tablename__ = 'project'
+	id = Column(String, primary_key=True, unique=True, nullable=False)
+	name = Column(String, nullable=False)
+	workspace_id = Column(UUID(as_uuid=True), ForeignKey('workspace.id'), nullable=False)
+	creator_id = Column(String, nullable=False)
+	objective = Column(Text, nullable=False)
+	created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+	updated_at = Column(DateTime(timezone=True), nullable=True)
+	goals = relationship("Goal", backref="project")
+
+class Goal(Base):
+	__tablename__ = 'goal'
+	id = Column(String, unique=True, nullable=False, primary_key=True)
+	description = Column(String, nullable=False)
+	project_id = Column(String, ForeignKey('project.id'), nullable=False)
+	status = Column(String, default='pending')
+	tasks = Column(JSON, nullable=False)
+	created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+	updated_at = Column(DateTime(timezone=True), nullable=True)
+	agent = relationship("Agent", backref="goal", uselist=False)
+
+class Agent(Base):
+	__tablename__ = 'agent'
+	id = Column(String, unique=True, nullable=False, primary_key=True)
+	role = Column(String, nullable=False)
+	scope = Column(String, nullable=True)
+	project_id = Column(String, ForeignKey('project.id'), nullable=False)
+	goal_id = Column(String, ForeignKey('goal.id'), nullable=False)
+	collaborators = Column(JSON, nullable=False)
+	created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+	updated_at = Column(DateTime(timezone=True), nullable=True)

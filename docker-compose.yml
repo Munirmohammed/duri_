@@ -13,6 +13,8 @@ services:
     volumes:
       - ./api:/app
       - $HOME/.aws/credentials:/root/.aws/credentials:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /ziv/shared/bio_gpt:/ziv/shared/bio_gpt
     environment:
       - DEPLOYMENT=prod
       - GITEA_TOKEN=2b95404977c519bb5c6bf7e17842a77cff75919a
@@ -22,7 +24,6 @@ services:
     depends_on:
       - rabbitmq
     networks:
-      - intranet
       - api
 
   rabbitmq:
@@ -39,6 +40,13 @@ services:
     networks:
       - api
 
+  redis:
+    image: "redis/redis-stack:latest"
+    hostname: redis
+    ports:
+      - "18001:8001"
+    networks:
+      - api
+
 networks:
-  intranet: {}
   api: {}
