@@ -11,6 +11,7 @@ from .workspace_router import router as workspace_router
 from .user_router import router as user_router
 from .notification_router import router as notification_router
 from .resource_router import router as resource_router
+from .project_router import router as project_router
 import asyncio
 import aio_pika
 from .events import consume
@@ -58,6 +59,7 @@ app.include_router(api_router) # prefix=settings.API_V1_STR
 app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(workspace_router)
+app.include_router(project_router, tags=["projects"])
 app.include_router(notification_router)
 app.include_router(resource_router, tags=["resources"])
 

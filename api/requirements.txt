@@ -19,3 +19,5 @@ pyjwt[crypto]
 stringcase
 requests
 aio-pika
+docker
+redis-om
