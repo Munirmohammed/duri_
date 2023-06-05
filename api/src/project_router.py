@@ -87,7 +87,7 @@ async def create_project(
 	db.commit()
 	return project
 
-@router.post("/project/{id}", response_model=project_schema.ProjectMini)
+@router.post("/project/{id}", response_model=project_schema.Project)
 async def get_project(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the project id"),

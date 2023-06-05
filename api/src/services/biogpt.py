@@ -60,7 +60,7 @@ class Biogpt():
 	def run(self, objective) -> dict:
 		workdir = self.workdir
 	
-	def call(self, cmd, wait=False, auto_remove=False) -> dict:
+	def call(self, cmd, wait=False, auto_remove=True) -> dict:
 		client = docker.from_env()
 		assert self.workdir
 		workdir = self.workdir
