@@ -41,6 +41,8 @@ class GoalModel(EmbeddedJsonModel, GoalBase):
     
 
 class ProjectModel(JsonModel):
+    name: Optional[str] = Field(index=True)
+    workdir: Optional[str] = Field(default=None)
     objective:  str = Field(index=True)
     goals: Optional[List[GoalModel]]
     assistants: Optional[List[AssistantModel]]

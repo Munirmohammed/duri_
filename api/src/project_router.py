@@ -47,14 +47,15 @@ async def create_project(
 	proj = biogpt.init(objective)
 	project_id = proj.pk
 	goals = proj.goals
+	name = proj.name
 	assistants = proj.assistants
 	project = crud_project.get(project_id)
 	if project:
-		crud_project.remove(project.id)
-		#return project
+		#crud_project.remove(project.id)
+		return project
 	project = crud_project.create({
 		'id': project_id,
-		'name': 'a name',
+		'name': name,
 		'creator_id': user_id,
 		'objective': objective,
 		'workspace_id': workspace_id,
