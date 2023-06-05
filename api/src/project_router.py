@@ -51,7 +51,7 @@ async def create_project(
 	assistants = proj.assistants
 	project = crud_project.get(project_id)
 	if project:
-		#crud_project.remove(project.id)
+		#crud_project.remove(project_id)
 		return project
 	project = crud_project.create({
 		'id': project_id,

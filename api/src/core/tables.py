@@ -166,7 +166,8 @@ class Project(Base):
 	objective = Column(Text, nullable=False)
 	created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
 	updated_at = Column(DateTime(timezone=True), nullable=True)
-	goals = relationship("Goal", backref="project")
+	goals = relationship("Goal", backref="project", cascade="all, delete-orphan")
+	agents = relationship("Agent", backref="project", cascade="all, delete-orphan")
 
 class Goal(Base):
 	__tablename__ = 'goal'
