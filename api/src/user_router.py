@@ -132,7 +132,7 @@ async def switch_user_workspace_team(
     # set as active team
     user = crud_user.set_active_team(user_id, team_id)
     #print(user_workspace)
-    return team_db_obj
+    return user_team
 
 @router.get("/user/workspaces", response_model=List[schema.UserWorkspaceAssoc], tags=["User"])
 async def list_user_workspaces(
