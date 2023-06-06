@@ -164,6 +164,8 @@ class Project(Base):
 	workspace_id = Column(UUID(as_uuid=True), ForeignKey('workspace.id'), nullable=False)
 	creator_id = Column(String, nullable=False)
 	objective = Column(Text, nullable=False)
+	meta = Column(JSON, nullable=False)
+	status = Column(String, default='pending')
 	created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
 	updated_at = Column(DateTime(timezone=True), nullable=True)
 	goals = relationship("Goal", backref="project", cascade="all, delete-orphan")

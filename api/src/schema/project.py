@@ -42,6 +42,9 @@ class AgentBase(BaseModel):
 	class Config:
 		orm_mode = True
 
+class Agent(AgentBase):
+	pass
+
 class ProjectMini(ProjectBase):
 	pass
 

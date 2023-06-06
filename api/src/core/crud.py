@@ -116,3 +116,6 @@ class Project(CRUDBase):
 		else:
 			query = query.order_by(db_model.created_at.asc()).offset(skip)
 			return query.limit(limit).all()
+
+class Agent(CRUDBase):
+	pass

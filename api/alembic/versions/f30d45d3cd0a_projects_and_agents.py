@@ -26,6 +26,8 @@ def upgrade():
         sa.Column("workspace_id", UUID(as_uuid=True), sa.ForeignKey('workspace.id'), nullable=False), # *(required)
         sa.Column("creator_id", sa.String(), nullable=False, comment="user_id of the creator of this team"), # *(required)
         sa.Column("objective", sa.Text(), nullable=False),
+        sa.Column("status", sa.String(), server_default='pending'),
+        sa.Column("meta", sa.JSON(), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=func.now()),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
     )

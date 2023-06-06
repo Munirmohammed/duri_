@@ -1,3 +1,4 @@
+import string
 import docker
 import tempfile
 import json
@@ -25,6 +26,7 @@ class Biogpt():
 
 	def get_project(self, objective) -> dict:
 		""" get a project from redis  """
+		objective = objective.strip()
 		try:
 			project = ProjectModel.find(ProjectModel.objective == objective).first()
 			print(project.workdir)
@@ -34,6 +36,8 @@ class Biogpt():
 				project.workdir = self.set_workdir()
 				project.save()
 			#print(project)
+			project.name = project.name.strip().replace("\\n", "").replace('\"', "").strip(string.punctuation).strip()
+			project.save()
 			self.project = project
 			return project
 		except NotFoundError as e:
@@ -58,7 +62,12 @@ class Biogpt():
 		return project
 
 	def run(self, objective) -> dict:
-		workdir = self.workdir
+		project = self.get_project(objective)
+		if not project:
+			raise NotFoundError()
+		cmds = [ "run", "-o", objective]
+		container = self.call(cmds, wait=False, auto_remove=False)
+		return container
 	
 	def call(self, cmd, wait=False, auto_remove=True) -> dict:
 		client = docker.from_env()
