@@ -30,6 +30,7 @@ async def get_user_profile(
     team = user.active_team
     user_profile['team'] = team
     user_profile['workspace'] = team.workspace
+    user_profile['project'] = user.project
     return user_profile
 
 @router.post("/user/search", response_model=schema.UserProfile, tags=["User"])
@@ -52,6 +53,7 @@ async def search_user(
     team = user.active_team
     user_profile['team'] = team
     user_profile['workspace'] = team.workspace
+    user_profile['project'] = user.project
     return user_profile
 
 @router.post("/user/workspace", tags=["User"])

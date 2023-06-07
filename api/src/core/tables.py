@@ -23,9 +23,11 @@ class User(Base):
 	email = Column(String, unique=True, nullable=False)
 	username = Column(String, unique=True, nullable=False)
 	active_team_id = Column(UUID(as_uuid=True), ForeignKey('team.id'), nullable=True)
+	active_project_id = Column(String, ForeignKey('project.id'), nullable=True)
 	created_at = Column(DateTime(timezone=True), nullable=False)
 	updated_at = Column(DateTime(timezone=True), nullable=True)
 	active_team = relationship("Team")
+	project = relationship("Project", backref="user", uselist=False)
 	#teams = association_proxy("user_teams", "team")
 	#workspaces = association_proxy("user_workspaces", "workspace")
 	user_workspaces = relationship(

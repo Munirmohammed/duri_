@@ -54,9 +54,14 @@ def upgrade():
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=func.now()),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
     )
+    op.add_column(
+        'user', 
+        sa.Column("active_project_id", sa.String, sa.ForeignKey('project.id'), nullable=True),
+    )
 
 
 def downgrade():
+    op.drop_column('user', 'active_project_id')
     op.drop_table("agent")
     op.drop_table("goal")
     op.drop_table("project")

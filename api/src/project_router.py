@@ -43,6 +43,7 @@ async def create_project(
 	workspace_id = auth_user.workspace.id
 	user_id = auth_user.id
 	crud_project = crud.Project(tables.Project, db)
+	crud_user = crud.User(tables.User, db)
 	#project = crud_project.filter_by(workspace_id=workspace_id, limit=1)
 	biogpt = Biogpt()
 	proj = biogpt.init(objective, name)
@@ -86,6 +87,9 @@ async def create_project(
 			})
 			goal.agent = agent
 		project.goals.append(goal)
+	if not auth_user.project:
+		user = crud_user.get(user_id)
+		user.active_project_id = project_id
 	db.commit()
 	return project
 
@@ -133,6 +137,28 @@ async def run_project(
 	project.meta = {
 		'container_id': container_id
 	}
+	db.commit()
+	return project
+
+@router.post("/project/{id}/switch")
+async def switch_project(
+	auth_user: schema.UserProfile = Depends(deps.user_from_header),
+	id: str = Path(..., description="the project id"),
+	db: Session = Depends(deps.get_db),
+):
+	"""
+	make this project as active project
+	"""
+	workspace_id = auth_user.workspace.id
+	user_id = auth_user.id
+	crud_project = crud.Project(tables.Project, db)
+	crud_user = crud.User(tables.User, db)
+	project = crud_project.get(id)
+	if not project:
+		raise HTTPException(status_code=500, detail="project not exist")
+	project_id = project.id
+	user = crud_user.get(user_id)
+	user.active_project_id = project_id
 	db.commit()
 	return project
 

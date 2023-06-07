@@ -4,6 +4,7 @@ from typing import Optional, List, Type, NewType, Any, Dict, Union
 from enum import Enum
 from datetime import datetime
 from .config import settings
+from src.schema.project import ProjectMini
 
 class Ga4ghOrganization(BaseModel):
 	name: str
@@ -175,6 +176,7 @@ class UserTeamAssoc(TeamBase):
 class UserProfile(UserBase):
 	team: TeamBase = Field(None, description="the current active team")
 	workspace: WorkspaceBase = Field(None, description="the current active workspace")
+	project: Optional[ProjectMini] = Field(None, description="the current active project")
 	# teams: List[UserTeamAssoc] = Field(..., description="the user teams")
 
 class PassportVisaToken(BaseModel):

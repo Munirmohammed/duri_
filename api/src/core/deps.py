@@ -6,24 +6,24 @@ from . import crud_utils
 from .schema import UserBase, UserProfile
 
 class MySuperContextManager:
-    def __init__(self):
-        self.db = SessionLocal()
+	def __init__(self):
+		self.db = SessionLocal()
 
-    def __enter__(self):
-        return self.db
+	def __enter__(self):
+		return self.db
 
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.db.close()
+	def __exit__(self, exc_type, exc_value, traceback):
+		self.db.close()
 
 def get_db():
-    with MySuperContextManager() as db:
-        yield db
-    """ try:
-        db = SessionLocal()
-        yield db
-    finally:
-        db.close() """
-    
+	with MySuperContextManager() as db:
+		yield db
+	""" try:
+		db = SessionLocal()
+		yield db
+	finally:
+		db.close() """
+	
 def user_from_query(
 	userid: str = Query(None, description="The omic user-id."),
 	db: Session = Depends(get_db),
@@ -35,6 +35,7 @@ def user_from_query(
 	team = user.active_team
 	user_profile['team'] = team
 	user_profile['workspace'] = team.workspace
+	user_profile['project'] = user.project
 	return user_profile
 
 def user_from_header(
@@ -49,4 +50,5 @@ def user_from_header(
 	team = user.active_team
 	user_profile['team'] = team
 	user_profile['workspace'] = team.workspace
+	user_profile['project'] = user.project
 	return UserProfile(**user_profile)
