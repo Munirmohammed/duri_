@@ -1,5 +1,6 @@
 import string
 import random
+import docker 
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 	""" https://stackoverflow.com/a/2257449/1226748  """
@@ -14,6 +15,16 @@ def wait_for_container(container):
 		container.reload()
 	return container.status
 
+def check_container_status(container_id):
+    client = docker.from_env()
+    try:
+        container = client.containers.get(container_id)
+        if container.status == 'running':
+            return True
+        else:
+            return False
+    except docker.errors.NotFound:
+        return False
 
 class Dict2Obj(object):
 	"""

@@ -29,19 +29,20 @@ class Goal(GoalBase):
 ### REDIS DATA MODELS
 class AssistantBaseModel(EmbeddedJsonModel, AssistantBase):
     class Meta:
+        global_key_prefix = "biogpt"
+        model_key_prefix = "assistant"
         database = redis_conn
 
 class AssistantModel(AssistantBaseModel):
     goal_id: str = Field(index=True)
     collaborator: Optional[AssistantBaseModel] = None
-    class Meta:
-        database = redis_conn
 
 class GoalModel(EmbeddedJsonModel, GoalBase):
     steps: Optional[List[str]]
     class Meta:
+        global_key_prefix = "biogpt"
+        model_key_prefix = "goal"
         database = redis_conn
-    
 
 class ProjectModel(JsonModel):
     name: Optional[str] = Field(index=True)

@@ -11,6 +11,7 @@ from .core import deps, schema, crud, tables
 from .core.config import settings
 from .schema import project as project_schema
 from src.services import Biogpt
+from src import utils
 #from src.services.redis import ProjectModel
 #from redis_om import NotFoundError
 
@@ -121,12 +122,13 @@ async def run_project(
 	if project.meta and project.meta.get('container_id', None):
 		## todo: check if container is running
 		container_id = project.meta.get('container_id', None)
-		raise HTTPException(status_code=500, detail="project already running")
+		if utils.check_container_status(container_id):
+			raise HTTPException(status_code=500, detail="project already running")
 	max_count = 50
 	biogpt = Biogpt()
 	container = biogpt.run(objective, max_count)
 	#print(container)
-	project.status = 'running'
+	project.status = container.status.lower() #'running'
 	container_id = str(container.id)[:12]
 	project.meta = {
 		'container_id': container_id
