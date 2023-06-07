@@ -3,10 +3,10 @@ import docker
 import tempfile
 import json
 import time
+from redis_om import NotFoundError
 from src.utils import wait_for_container
 from src.core.config import settings
-from src.services.redis import ProjectModel
-from redis_om import NotFoundError
+from src.schema.redis import ProjectModel
 
 class Biogpt():
 	image_name: str = settings.biogpt_image
@@ -44,7 +44,7 @@ class Biogpt():
 			#print(e)
 			return None
 
-	def init(self, objective) -> ProjectModel:
+	def init(self, objective, name:str=None) -> ProjectModel:
 		""" get or starts an ai project. returns a unique id of that project objective provided """
 		project = self.get_project(objective)
 		if project and project.name:
@@ -59,13 +59,17 @@ class Biogpt():
 		while not project:
 			time.sleep(1)
 			project = self.get_project(objective)
+		if name:
+			project.name = name
+			project.save()
+		self.project = project
 		return project
 
-	def run(self, objective) -> dict:
+	def run(self, objective, max_count=50) -> dict:
 		project = self.get_project(objective)
 		if not project:
 			raise NotFoundError()
-		cmds = [ "run", "-o", objective]
+		cmds = [ "run", "-o", str(objective), '-c', str(max_count)]
 		container = self.call(cmds, wait=False, auto_remove=False)
 		return container
 	

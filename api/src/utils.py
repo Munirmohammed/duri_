@@ -22,3 +22,12 @@ class Dict2Obj(object):
 	def __init__(self, dictionary):
 		for key in dictionary:
 			setattr(self, key, dictionary[key])
+
+def snake_case(text):
+    # Replace non-alphanumeric characters with underscores
+    snake_string = re.sub('[^a-zA-Z0-9]', '_', text)
+    # Convert to lowercase and remove consecutive underscores
+    snake_string = re.sub('_+', '_', snake_string).lower()
+    # Remove underscores at the beginning and end of the string
+    snake_string = snake_string.strip('_')
+    return snake_string

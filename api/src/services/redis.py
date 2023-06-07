@@ -1,54 +1,23 @@
-from pydantic import  BaseModel
-from typing import Optional, List, Type, NewType, Any, Dict, Union
-from redis_om import (
-    EmbeddedJsonModel,
-    JsonModel,
-    Field,
-    Migrator
-)
-from redis_om import get_redis_connection
+from redis import Redis
 from src.core.config import settings
+from redis_om import get_redis_connection
 
-redis_conn = get_redis_connection(url=f"redis://{settings.redis_host}", decode_responses=True)
+print(settings.redis_host)
 
-## redis schemas
-class AssistantBase(BaseModel):
-    """Assistant agent object."""
-    role: str
-    scope: str
+#redis_conn = get_redis_connection(url=f"redis://{settings.redis_host}", decode_responses=True)
+redis_conn = Redis(host='redis', port=6379, decode_responses=True)
 
-class GoalBase(BaseModel):
-    """Goal-Basse object."""
-    index: str = Field(index=True)
-    goal: str = Field(index=True)
-    status: str = Field(index=True, default='pending')
+class RedisClient:
+    def __init__(self):
+        #self.redis_client = Redis(host=host, port=port)
+        self.redis_client = redis_conn
 
-class Goal(GoalBase):
-    """Goal object."""
-    assistant: AssistantBase
-    collaborator: Optional[AssistantBase] = None
-
-### REDIS DATA MODELS
-class AssistantBaseModel(EmbeddedJsonModel, AssistantBase):
-    pass
-
-class AssistantModel(AssistantBaseModel):
-    goal_id: str = Field(index=True)
-    collaborator: Optional[AssistantBaseModel] = None
-
-class GoalModel(EmbeddedJsonModel, GoalBase):
-    steps: Optional[List[str]]
-    
-
-class ProjectModel(JsonModel):
-    name: Optional[str] = Field(index=True)
-    workdir: Optional[str] = Field(default=None)
-    objective:  str = Field(index=True)
-    goals: Optional[List[GoalModel]]
-    assistants: Optional[List[AssistantModel]]
-    class Meta:
-        global_key_prefix = "biogpt"
-        model_key_prefix = "project"
-        database = redis_conn
-
-Migrator().run()
+    def scan_keys(self, key_pattern):
+        cursor = '0'
+        keys = []
+        while True:
+            cursor, partial_keys = self.redis_client.scan(cursor, match=key_pattern)
+            keys.extend(partial_keys)
+            if cursor == '0':
+                break
+        return [key.decode() for key in keys]

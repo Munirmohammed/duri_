@@ -44,7 +44,7 @@ async def create_project(
 	crud_project = crud.Project(tables.Project, db)
 	#project = crud_project.filter_by(workspace_id=workspace_id, limit=1)
 	biogpt = Biogpt()
-	proj = biogpt.init(objective)
+	proj = biogpt.init(objective, name)
 	project_id = proj.pk
 	goals = proj.goals
 	name = proj.name
@@ -121,13 +121,15 @@ async def run_project(
 	if project.meta and project.meta.get('container_id', None):
 		## todo: check if container is running
 		container_id = project.meta.get('container_id', None)
-		raise HTTPException(status_code=500, detail="project already running") 
+		raise HTTPException(status_code=500, detail="project already running")
+	max_count = 50
 	biogpt = Biogpt()
-	container = biogpt.run(objective)
-	print(container)
+	container = biogpt.run(objective, max_count)
+	#print(container)
 	project.status = 'running'
+	container_id = str(container.id)[:12]
 	project.meta = {
-		'container_id': container.shortid
+		'container_id': container_id
 	}
 	db.commit()
 	return project
@@ -184,3 +186,24 @@ async def get_agent(
 	if not agent:
 		raise HTTPException(status_code=500, detail="agent of provided agent-id not exist")
 	return agent
+
+@router.get("/project/{id}/agent/{agent_id}/chat")
+async def get_agent(
+	auth_user: schema.UserProfile = Depends(deps.user_from_header),
+	id: str = Path(..., description="the project id"),
+	agent_id: str = Path(..., description="the agent id"),
+	db: Session = Depends(deps.get_db),
+):
+	"""
+	get an agent
+	"""
+	workspace_id = auth_user.workspace.id
+	crud_project = crud.Project(tables.Project, db)
+	crud_agent = crud.Agent(tables.Agent, db)
+	project = crud_project.get(id)
+	if not project:
+		raise HTTPException(status_code=500, detail="project not exist")
+	agent = crud_agent.get(agent_id)
+	if not agent:
+		raise HTTPException(status_code=500, detail="agent of provided agent-id not exist")
+	return 'test'
