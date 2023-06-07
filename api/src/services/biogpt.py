@@ -70,7 +70,7 @@ class Biogpt():
 		if not project:
 			raise NotFoundError()
 		cmds = [ "run", "-o", str(objective), '-c', str(max_count)]
-		container = self.call(cmds, wait=False, auto_remove=False)
+		container = self.call(cmds, wait=False, auto_remove=True)
 		return container
 	
 	def call(self, cmd, wait=False, auto_remove=True) -> dict:

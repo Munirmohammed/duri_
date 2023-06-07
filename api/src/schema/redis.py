@@ -36,6 +36,10 @@ class AssistantBaseModel(EmbeddedJsonModel, AssistantBase):
 class AssistantModel(AssistantBaseModel):
     goal_id: str = Field(index=True)
     collaborator: Optional[AssistantBaseModel] = None
+    class Meta:
+        global_key_prefix = "biogpt"
+        model_key_prefix = "assistant"
+        database = redis_conn
 
 class GoalModel(EmbeddedJsonModel, GoalBase):
     steps: Optional[List[str]]

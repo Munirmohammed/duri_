@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from .core import deps, schema, crud, tables
 from .core.config import settings
 from .schema import project as project_schema
-from src.services import Biogpt
+from src.services import Biogpt, RedisClient
 from src import utils
 #from src.services.redis import ProjectModel
 #from redis_om import NotFoundError
@@ -110,7 +110,7 @@ async def run_project(
 	db: Session = Depends(deps.get_db),
 ):
 	"""
-	run a project (todo)
+	run a project
 	"""
 	workspace_id = auth_user.workspace.id
 	crud_project = crud.Project(tables.Project, db)
@@ -124,11 +124,11 @@ async def run_project(
 		container_id = project.meta.get('container_id', None)
 		if utils.check_container_status(container_id):
 			raise HTTPException(status_code=500, detail="project already running")
-	max_count = 50
+	max_count = 5
 	biogpt = Biogpt()
 	container = biogpt.run(objective, max_count)
 	#print(container)
-	project.status = container.status.lower() #'running'
+	project.status = 'running' ## container.status.lower()
 	container_id = str(container.id)[:12]
 	project.meta = {
 		'container_id': container_id
@@ -190,7 +190,7 @@ async def get_agent(
 	return agent
 
 @router.get("/project/{id}/agent/{agent_id}/chat")
-async def get_agent(
+async def get_agent_chat(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the project id"),
 	agent_id: str = Path(..., description="the agent id"),
@@ -208,4 +208,23 @@ async def get_agent(
 	agent = crud_agent.get(agent_id)
 	if not agent:
 		raise HTTPException(status_code=500, detail="agent of provided agent-id not exist")
-	return 'test'
+	project_id = project.id
+	agent_role = agent.role
+	agent_role_name = utils.snake_case(agent_role)
+	redis_client = RedisClient()
+	key_pattern = f"doc:{project_id}:{agent_role_name}:agent:*"
+	keys = redis_client.get_keys(key_pattern)
+	#print(keys)
+	docs = []
+	for k in keys:
+		data = redis_client.get_hash(k)
+		#parsed = utils.parse_agent_doc(content)
+		content = data['content']
+		parsed = utils.parse_agent_doc(content)
+		r = {
+			'type': parsed['type'],
+			'content': parsed['data']['content']
+		}
+		docs.append(r)
+	print(docs)
+	return docs
