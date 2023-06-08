@@ -33,6 +33,12 @@ class AssistantBaseModel(EmbeddedJsonModel, AssistantBase):
         model_key_prefix = "assistant"
         database = redis_conn
 
+class PlannerModel(AssistantBaseModel):
+    class Meta:
+        global_key_prefix = "biogpt"
+        model_key_prefix = "assistant"
+        database = redis_conn
+
 class AssistantModel(AssistantBaseModel):
     goal_id: str = Field(index=True)
     collaborator: Optional[AssistantBaseModel] = None
@@ -53,6 +59,7 @@ class ProjectModel(JsonModel):
     workdir: Optional[str] = Field(default=None)
     objective:  str = Field(index=True)
     goals: Optional[List[GoalModel]]
+    project_manager: Optional[PlannerModel]
     assistants: Optional[List[AssistantModel]]
     class Meta:
         global_key_prefix = "biogpt"

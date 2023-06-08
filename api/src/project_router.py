@@ -140,7 +140,7 @@ async def run_project(
 	db.commit()
 	return project
 
-@router.post("/project/{id}/switch")
+@router.post("/project/{id}/switch", response_model=project_schema.Project)
 async def switch_project(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the project id"),

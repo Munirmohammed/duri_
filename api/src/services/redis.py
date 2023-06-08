@@ -11,6 +11,7 @@ redis_conn = Redis(host='redis', port=6379, decode_responses=True)
 Notes:
     - https://redis.readthedocs.io/en/stable/examples/search_json_examples.html#Searching
     - https://redis.readthedocs.io/en/stable/examples.html
+    - https://redis.io/commands/hget/
 """
 class RedisClient:
     def __init__(self):
