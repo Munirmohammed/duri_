@@ -250,8 +250,8 @@ def get_agent_chat(
 	agent_role = agent.role
 	agent_role_name = utils.snake_case(agent_role)
 	redis_client = RedisClient()
-	key_pattern = f"doc:{project_id}:{agent_role_name}:agent:*"
-	keys = redis_client.get_keys(key_pattern)
+	key_pattern = f"doc:{project_id}:{agent_role_name}:agent:index:"
+	keys = redis_client.get_set_keys(key_pattern)
 	#print(keys)
 	docs = []
 	for k in keys:

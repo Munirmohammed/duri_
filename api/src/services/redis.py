@@ -18,6 +18,11 @@ class RedisClient:
         #self.client = Redis(host='redis', port=6379,)
         self.client = redis_conn
 
+    def get_set_keys(self, set_key):
+        keys = self.client.zrange(set_key, 0, -1) # withscores=True
+        #print(keys)
+        return keys
+    
     def get_keys(self, key_pattern):
         keys = self.client.keys(key_pattern)
         print(keys)
