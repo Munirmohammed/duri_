@@ -7,6 +7,7 @@ from src.core import tables, deps, crud, schema
 
 def get_user(db: Session, user_id: str) -> tables.User:
     crud_user = crud.User(tables.User, db)
+    crud_project = crud.Project(tables.Project, db)
     user = crud_user.get(user_id)
     if not user:
         ## checks cognito for this user and create if not exists
@@ -31,6 +32,13 @@ def get_user(db: Session, user_id: str) -> tables.User:
         user = crud_user.create(db_obj)
     if not user:
         raise HTTPException(status_code=400, detail="user not exists")
+    if not user.project:
+        workspace_projects = user.active_team.workspace.projects
+        #print(workspace_projects)
+        if workspace_projects and len(workspace_projects) > 0:
+            default_project = workspace_projects[0]
+            user.active_project_id = default_project.id
+            db.commit()
     return user
 
 def get_user_workspaces(user: tables.User) -> List[schema.UserWorkspaceAssoc]:

@@ -68,6 +68,7 @@ class Workspace(Base):
 	created_at = Column(DateTime(timezone=True), nullable=False)
 	updated_at = Column(DateTime(timezone=True), nullable=True)
 	teams = relationship("Team", back_populates="workspace", cascade="all, delete-orphan")
+	projects = relationship("Project", backref="workspace", cascade="all, delete-orphan")
 
 class Team(Base):
 	__tablename__ = 'team'

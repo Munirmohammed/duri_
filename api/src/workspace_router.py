@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from .core import  deps, schema, crud, tables
 from .core.config import settings
 from .services import cognito, gitea
+from .schema import project as project_schema
 
 router = APIRouter()
 
@@ -204,6 +205,19 @@ async def list_teams(
     crud_workspace = crud.Workspace(tables.Workspace, db)
     workspace = crud_workspace.get_by_name(workspace_name)
     return workspace.teams
+
+@router.get("/workspace/{workspace_name}/project", response_model=List[project_schema.ProjectMini], tags=["Workspace"])
+async def list_workspace_projects(
+    workspace_name: str = Path(..., description="the workspace name"),
+    db: Session = Depends(deps.get_db),
+):
+    """
+    List workspace projects
+    """
+    #crud_project = crud.Project(tables.Project, db)
+    crud_workspace = crud.Workspace(tables.Workspace, db)
+    workspace = crud_workspace.get_by_name(workspace_name)
+    return workspace.projects
 
 @router.get("/workspace/{workspace_name}/users", response_model=List[schema.UserWorkspace], tags=["Workspace"])
 async def get_workspace_users(
