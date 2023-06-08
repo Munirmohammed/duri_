@@ -49,7 +49,7 @@ def upgrade():
         sa.Column("role", sa.String(), nullable=False), # *(required)
         sa.Column("scope", sa.String(), nullable=True), # *(required)
         sa.Column("project_id", sa.String, sa.ForeignKey('project.id'), nullable=False), # *(required)
-        sa.Column("goal_id", sa.String(), sa.ForeignKey('goal.id'), nullable=False), # *(required)
+        sa.Column("goal_id", sa.String(), sa.ForeignKey('goal.id'), nullable=True), # *(required)
         sa.Column("collaborators", sa.JSON, nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=func.now()),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),

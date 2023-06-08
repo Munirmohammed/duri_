@@ -190,7 +190,7 @@ class Agent(Base):
 	role = Column(String, nullable=False)
 	scope = Column(String, nullable=True)
 	project_id = Column(String, ForeignKey('project.id'), nullable=False)
-	goal_id = Column(String, ForeignKey('goal.id'), nullable=False)
+	goal_id = Column(String, ForeignKey('goal.id'), nullable=True)
 	collaborators = Column(JSON, nullable=False)
 	created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
 	updated_at = Column(DateTime(timezone=True), nullable=True)

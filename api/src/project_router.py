@@ -43,6 +43,7 @@ async def create_project(
 	workspace_id = auth_user.workspace.id
 	user_id = auth_user.id
 	crud_project = crud.Project(tables.Project, db)
+	crud_agent = crud.Agent(tables.Agent, db)
 	crud_user = crud.User(tables.User, db)
 	#project = crud_project.filter_by(workspace_id=workspace_id, limit=1)
 	biogpt = Biogpt()
@@ -50,6 +51,7 @@ async def create_project(
 	project_id = proj.pk
 	goals = proj.goals
 	name = proj.name
+	project_manager = proj.project_manager
 	assistants = proj.assistants
 	project = crud_project.get(project_id)
 	if project:
@@ -63,7 +65,15 @@ async def create_project(
 		'objective': objective,
 		'workspace_id': workspace_id,
 	})
-	print(project)
+	#print(project)
+	## add project manager agent
+	crud_agent.create({
+		"id": project_manager.pk,
+		"role": project_manager.role,
+		"scope": project_manager.scope,
+		"project_id": project_id,
+	})
+	## insert goals and assistant agent
 	for g in goals:
 		goal_id = g.pk
 		goal = tables.Goal(**{

@@ -55,7 +55,7 @@ class Biogpt():
 		#print(response)
 		#resp_dict = json.loads(response).get("project_id", None)
 		#project_id = resp_dict.get("project_id", None)
-		project = self.get_project(objective)
+		#project = self.get_project(objective)
 		while not project:
 			time.sleep(1)
 			project = self.get_project(objective)
