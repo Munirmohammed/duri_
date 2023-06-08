@@ -9,7 +9,7 @@ class ProjectBase(BaseModel):
 	name: str = Field(..., description="project name")
 	objective: str = Field(..., description="project objective")
 	workspace_id: Union[str, UUID4] = Field(..., description="workspace id")
-	status: str = Field('created', description="the project run status")
+	status: str = Field(..., description="the project run status")
 	# name: Dict[str, Any] = Field(..., description="message")
 	created_at: datetime = Field(..., description="the creation date")
 	updated_at: Optional[datetime] = Field(None, description="the update date")

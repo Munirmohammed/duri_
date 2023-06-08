@@ -29,7 +29,9 @@ class Biogpt():
 		objective = objective.strip()
 		try:
 			project = ProjectModel.find(ProjectModel.objective == objective).first()
-			print(project.workdir)
+			if not project:
+				return None
+			print('project.workdir: ', project.workdir)
 			if project.workdir:
 				self.workdir = project.workdir
 			else:
@@ -41,6 +43,9 @@ class Biogpt():
 			self.project = project
 			return project
 		except NotFoundError as e:
+			#print(e)
+			return None
+		except Exception:
 			#print(e)
 			return None
 
@@ -55,10 +60,13 @@ class Biogpt():
 		#print(response)
 		#resp_dict = json.loads(response).get("project_id", None)
 		#project_id = resp_dict.get("project_id", None)
-		#project = self.get_project(objective)
-		while not project:
+		while True:
 			time.sleep(1)
 			project = self.get_project(objective)
+			if project:
+				break
+		project = self.get_project(objective)	
+		#print(project)
 		if name:
 			project.name = name
 			project.save()

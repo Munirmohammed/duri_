@@ -18,7 +18,7 @@ from src import utils
 router = APIRouter()
 
 @router.get("/project", response_model=List[project_schema.ProjectMini])
-async def list_projects(
+def list_projects(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	db: Session = Depends(deps.get_db),
 ):
@@ -31,7 +31,7 @@ async def list_projects(
 	return projects
 
 @router.post("/project", response_model=project_schema.ProjectMini)
-async def create_project(
+def create_project(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	objective: str = Form(..., description="the project objective"),
 	name: Optional[str] = Form(None, description="the project name"),
@@ -61,11 +61,12 @@ async def create_project(
 	project = crud_project.create({
 		'id': project_id,
 		'name': name,
+		'status': 'created',
 		'creator_id': user_id,
 		'objective': objective,
 		'workspace_id': workspace_id,
 	})
-	#print(project)
+	print(project)
 	## add project manager agent
 	crud_agent.create({
 		"id": project_manager.pk,
@@ -97,14 +98,15 @@ async def create_project(
 			})
 			goal.agent = agent
 		project.goals.append(goal)
+	db.commit()
 	if not auth_user.project:
 		user = crud_user.get(user_id)
 		user.active_project_id = project_id
-	db.commit()
+		db.commit()
 	return project
 
 @router.get("/project/{id}", response_model=project_schema.Project)
-async def get_project(
+def get_project(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the project id"),
 	db: Session = Depends(deps.get_db),
@@ -118,7 +120,7 @@ async def get_project(
 	return project
 
 @router.post("/project/{id}/run", response_model=project_schema.Project)
-async def run_project(
+def run_project(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the project id"),
 	db: Session = Depends(deps.get_db),
@@ -151,7 +153,7 @@ async def run_project(
 	return project
 
 @router.post("/project/{id}/switch", response_model=project_schema.Project)
-async def switch_project(
+def switch_project(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the project id"),
 	db: Session = Depends(deps.get_db),
@@ -173,7 +175,7 @@ async def switch_project(
 	return project
 
 @router.post("/project/{id}/stop", response_model=project_schema.Project)
-async def stop_project(
+def stop_project(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the project id"),
 	db: Session = Depends(deps.get_db),
@@ -189,7 +191,7 @@ async def stop_project(
 	return project
 
 @router.get("/project/{id}/agent", response_model=List[project_schema.Agent])
-async def list_agents(
+def list_agents(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the project id"),
 	db: Session = Depends(deps.get_db),
@@ -205,7 +207,7 @@ async def list_agents(
 	return project.agents
 
 @router.get("/project/{id}/agent/{agent_id}", response_model=project_schema.Agent)
-async def get_agent(
+def get_agent(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the project id"),
 	agent_id: str = Path(..., description="the agent id"),
@@ -226,7 +228,7 @@ async def get_agent(
 	return agent
 
 @router.get("/project/{id}/agent/{agent_id}/chat")
-async def get_agent_chat(
+def get_agent_chat(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the project id"),
 	agent_id: str = Path(..., description="the agent id"),
