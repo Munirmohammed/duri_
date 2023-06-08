@@ -28,9 +28,9 @@ class GoalBase(BaseModel):
 
 class CollaboratorBase(BaseModel):
     """Assistant agent object."""
-    id: str
-    role: str
-    scope: str
+    id: Optional[str] = Field(None, description="collaborator id")
+    role: Optional[str] = Field(None, description="collaborator role")
+    scope: Optional[str] = Field(None, description="collaborator scope")
     
 class AgentBase(BaseModel):
 	id: str = Field(..., description="agent id")

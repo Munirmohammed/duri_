@@ -66,14 +66,15 @@ def create_project(
 		'objective': objective,
 		'workspace_id': workspace_id,
 	})
-	print(project)
+	#print(project)
 	## add project manager agent
-	crud_agent.create({
-		"id": project_manager.pk,
-		"role": project_manager.role,
-		"scope": project_manager.scope,
-		"project_id": project_id,
-	})
+	if project_manager:
+		crud_agent.create({
+			"id": project_manager.pk,
+			"role": project_manager.role,
+			"scope": project_manager.scope,
+			"project_id": project_id,
+		})
 	## insert goals and assistant agent
 	for g in goals:
 		goal_id = g.pk
