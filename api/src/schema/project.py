@@ -53,3 +53,8 @@ class Project(ProjectBase):
 	goals: List[GoalBase]
 	agents: List[AgentBase]
 
+
+class ChatMessage(BaseModel):
+	role: str = Field(..., description="the speaker")
+	content: str = Field(..., description="the content")
+

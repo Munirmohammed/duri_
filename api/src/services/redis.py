@@ -27,9 +27,6 @@ class RedisClient:
         keys = self.client.keys(key_pattern)
         print(keys)
         return keys
-        result = [key.decode() for key in keys]
-        print(result)
-        return result
     
     def get_hash(self, key_name):
         content = self.client.hget(key_name, 'content')

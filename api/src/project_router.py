@@ -228,7 +228,7 @@ def get_agent(
 		raise HTTPException(status_code=500, detail="agent of provided agent-id not exist")
 	return agent
 
-@router.get("/project/{id}/agent/{agent_id}/chat")
+@router.get("/project/{id}/agent/{agent_id}/chat", response_model=List[project_schema.ChatMessage])
 def get_agent_chat(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the project id"),
@@ -259,11 +259,15 @@ def get_agent_chat(
 		data = redis_client.get_hash(k)
 		#parsed = utils.parse_agent_doc(content)
 		content = data['content']
-		parsed = utils.parse_agent_doc(content)
+		message = utils.parse_agent_doc(content)
+		message_type = message['type']
+		message_data = message['data']
+		message_role = message_data['role'] if message_type == 'chat' else message_type
+		message_content = message_data['content']
 		r = {
-			'type': parsed['type'],
-			'content': parsed['data']['content']
+			'role': message_role,
+			'content': message_content
 		}
 		docs.append(r)
-	print(docs)
+	#print(docs)
 	return docs
