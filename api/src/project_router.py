@@ -100,10 +100,10 @@ def create_project(
 			goal.agent = agent
 		project.goals.append(goal)
 	db.commit()
-	if not auth_user.project:
-		user = crud_user.get(user_id)
-		user.active_project_id = project_id
-		db.commit()
+	#if not auth_user.project:
+	user = crud_user.get(user_id)
+	user.active_project_id = project_id
+	db.commit()
 	return project
 
 @router.get("/project/{id}", response_model=project_schema.Project)
@@ -118,6 +118,8 @@ def get_project(
 	workspace_id = auth_user.workspace.id
 	crud_project = crud.Project(tables.Project, db)
 	project = crud_project.get(id)
+	if not project:
+		raise HTTPException(status_code=404, detail="project not exist")
 	return project
 
 @router.post("/project/{id}/run", response_model=project_schema.Project)
@@ -189,6 +191,8 @@ def stop_project(
 	project = crud_project.get(id)
 	if not project:
 		raise HTTPException(status_code=500, detail="project not exist")
+	project_id = project.id
+	#crud_project.remove(project_id) ## for testing
 	return project
 
 @router.get("/project/{id}/agent", response_model=List[project_schema.Agent])
@@ -206,6 +210,40 @@ def list_agents(
 	if not project:
 		raise HTTPException(status_code=500, detail="project not exist")
 	return project.agents
+
+@router.get("/project/{id}/activity")
+def get_activity(
+	auth_user: schema.UserProfile = Depends(deps.user_from_header),
+	id: str = Path(..., description="the project id"),
+	db: Session = Depends(deps.get_db),
+):
+	"""
+	Get project activity
+	"""
+	workspace_id = auth_user.workspace.id
+	crud_project = crud.Project(tables.Project, db)
+	project = crud_project.get(id)
+	if not project:
+		raise HTTPException(status_code=500, detail="project not exist")
+	project_id = project.id
+	redis_client = RedisClient()
+	project_index_key = f"doc:{project_id}:index:activity"
+	#agent_index_key = f"doc:{project_id}:{role_name}:index:activity"
+	keys = redis_client.get_set_keys(project_index_key)
+	docs = []
+	for k in keys:
+		data = redis_client.get_hash(k)
+		content = data['content']
+		message = utils.parse_agent_doc(content)
+		#print(type(message))
+		if not isinstance(message, dict):
+			continue
+		message_type = message['type']
+		message_data = message['data']
+		if not isinstance(message_data, dict):
+			continue
+		docs.append(message_data)
+	return docs
 
 @router.get("/project/{id}/agent/{agent_id}", response_model=project_schema.Agent)
 def get_agent(
