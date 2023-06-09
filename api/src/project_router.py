@@ -232,6 +232,8 @@ def get_activity(
 	keys = redis_client.get_set_keys(project_index_key)
 	docs = []
 	for k in keys:
+		role = k.replace(f"doc:{project_id}:", "").split(":")[0]
+		print(role)
 		data = redis_client.get_hash(k)
 		content = data['content']
 		message = utils.parse_agent_doc(content)
@@ -242,6 +244,11 @@ def get_activity(
 		message_data = message['data']
 		if not isinstance(message_data, dict):
 			continue
+		message_data['role'] = role
+		""" r = {
+			'role': role,
+			'content': message_data
+		} """
 		docs.append(message_data)
 	return docs
 
