@@ -58,3 +58,12 @@ class ChatMessage(BaseModel):
 	role: str = Field(..., description="the speaker")
 	content: str = Field(..., description="the content")
 
+class OutputFile(BaseModel):
+	id: str = Field(..., description="the file id")
+	name: str = Field(..., description="the file name")
+	path: str = Field(..., description="the file path")
+	type: str = Field(..., description="the file type  one of `file` or `dir`")
+	size: str = Field(..., description="the file size  in bytes")
+	created: datetime = Field(..., description="the file creation date")
+	modified: Optional[str] = Field(None, description="the file modified date")
+

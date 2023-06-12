@@ -19,7 +19,7 @@ from src.util.migrate_projects import sync_outputs
 
 router = APIRouter()
 
-@router.get("/project/{id}/outputs")
+''' @router.post("/project/{id}/outputs")
 def test_project_outputs(
 	id: str = Path(..., description="the project id"),
 	#auth_user: schema.UserProfile = Depends(deps.user_from_header),
@@ -39,7 +39,7 @@ def test_project_outputs(
 			results[project_id] = sync_outputs(proj)
 		except Exception:
 			pass
-	return results
+	return results '''
 
 @router.get("/project", response_model=List[project_schema.ProjectMini])
 def list_projects(
@@ -201,7 +201,7 @@ def switch_project(
 	db.commit()
 	return project
 
-@router.get("/project/{id}/output")
+@router.get("/project/{id}/output", response_model=List[project_schema.OutputFile])
 def list_project_outputs(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the project id"),
@@ -222,7 +222,7 @@ def list_project_outputs(
 		output_key  = f'outputs:{project_id}:'
 		redis_client = RedisClient().client
 		results = redis_client.json().get(output_key, '$')
-		
+		results = [e for sublist in results for e in sublist]
 	except Exception:
 		pass
 	#crud_project.remove(project_id) ## for testing
