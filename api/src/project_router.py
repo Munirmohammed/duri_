@@ -26,7 +26,7 @@ def test_project_outputs(
 	db: Session = Depends(deps.get_db),
 ):
 	"""
-	test project outputs
+	migrate project outputs
 	"""
 	crud_project = crud.Project(tables.Project, db)
 	projects = crud_project.get_multi()
@@ -216,8 +216,17 @@ def list_project_outputs(
 	if not project:
 		raise HTTPException(status_code=500, detail="project not exist")
 	project_id = project.id
+	project_key  = f'outputs:{project_id}:'
+	results = []
+	try:
+		output_key  = f'outputs:{project_id}:'
+		redis_client = RedisClient().client
+		results = redis_client.json().get(output_key, '$')
+		
+	except Exception:
+		pass
 	#crud_project.remove(project_id) ## for testing
-	return project
+	return results
 
 @router.post("/project/{id}/stop", response_model=project_schema.Project)
 def stop_project(
