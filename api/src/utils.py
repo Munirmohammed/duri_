@@ -3,10 +3,17 @@ import random
 import docker 
 import re
 import json
+import hashlib
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 	""" https://stackoverflow.com/a/2257449/1226748  """
 	return ''.join(random.choice(chars) for _ in range(size))
+
+def generate_id(text:str) -> str:
+	""" generate a unique id of a given text, 
+	the id will always be the same for the same exact text """
+	_id = hashlib.md5(text.encode()).hexdigest()
+	return _id
 
 def wait_for_container(container):
 	"""

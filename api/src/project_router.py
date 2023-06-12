@@ -12,10 +12,34 @@ from .core.config import settings
 from .schema import project as project_schema
 from src.services import Biogpt, RedisClient
 from src import utils
+from src.schema.redis import ProjectModel
+from src.util.migrate_projects import sync_outputs
 #from src.services.redis import ProjectModel
 #from redis_om import NotFoundError
 
 router = APIRouter()
+
+@router.get("/project/{id}/outputs")
+def test_project_outputs(
+	id: str = Path(..., description="the project id"),
+	#auth_user: schema.UserProfile = Depends(deps.user_from_header),
+	db: Session = Depends(deps.get_db),
+):
+	"""
+	test project outputs
+	"""
+	crud_project = crud.Project(tables.Project, db)
+	projects = crud_project.get_multi()
+	results = {}
+	for project in projects:
+		project_id = project.id
+		try:
+			proj = ProjectModel.get(project_id)
+			print(proj.workdir)
+			results[project_id] = sync_outputs(proj)
+		except Exception:
+			pass
+	return results
 
 @router.get("/project", response_model=List[project_schema.ProjectMini])
 def list_projects(
@@ -175,6 +199,24 @@ def switch_project(
 	user = crud_user.get(user_id)
 	user.active_project_id = project_id
 	db.commit()
+	return project
+
+@router.get("/project/{id}/output")
+def list_project_outputs(
+	auth_user: schema.UserProfile = Depends(deps.user_from_header),
+	id: str = Path(..., description="the project id"),
+	db: Session = Depends(deps.get_db),
+):
+	"""
+	list project outputs 
+	"""
+	workspace_id = auth_user.workspace.id
+	crud_project = crud.Project(tables.Project, db)
+	project = crud_project.get(id)
+	if not project:
+		raise HTTPException(status_code=500, detail="project not exist")
+	project_id = project.id
+	#crud_project.remove(project_id) ## for testing
 	return project
 
 @router.post("/project/{id}/stop", response_model=project_schema.Project)
