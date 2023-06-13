@@ -67,3 +67,9 @@ class OutputFile(BaseModel):
 	created: datetime = Field(..., description="the file creation date")
 	modified: Optional[str] = Field(None, description="the file modified date")
 
+class FileContent(BaseModel):
+	id: str = Field(..., description="the file id")
+	path: str = Field(..., description="the file path")
+	content: str = Field(..., description="the file content in base64")
+	
+

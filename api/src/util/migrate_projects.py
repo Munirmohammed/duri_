@@ -16,18 +16,25 @@ def sync_outputs(project):
 		return results
 	project_id = project.pk
 	base_key = f'outputs:{project_id}:'
-	
+	base_keyname = f'outputs:{project_id}:'
+	#root_path = workdir
 	for root, dirs, files in os.walk(workdir):
 		#print(root, dirs, files)
 		root_path = os.path.normpath(root)
 		root_rel_path = os.path.relpath(root_path, workdir)
-		#print('root_rel_path', root_rel_path)
+		
+		print('root_rel_path', root_rel_path)
 		if root_rel_path != '.':
-			for n in root_rel_path.split('/'):
-				#print(n)
-				id = generate_id(n)
-				base_key = base_key + f"{id}:"
-		#print('base_key', base_key)
+			root_rel_path =  root_rel_path + "/"
+			#joined_keys = []
+			#for n in root_rel_path.split('/'):
+			#	id = generate_id(n)
+			#	#print(n , id)
+			#	joined_keys.append(id)
+			#joined_keys = ":".join(joined_keys)
+			root_id = generate_id(root_rel_path)
+			base_key = base_keyname + f"{root_id}"
+		print('base_key', base_key)
 		if not redis_client.exists(base_key):
 			print('create a list-key ', base_key)
 			#redis_client.lpush(base_key, '')
@@ -36,10 +43,11 @@ def sync_outputs(project):
 		ids = redis_client.json().get(base_key, '$..id')
 		for filename in files:
 			realpath = os.path.join(root_path, filename)
-			rel_path = os.path.relpath(realpath, workdir)
+			rel_path =  os.path.relpath(realpath, workdir)
 			#print('file.rel_path' , rel_path)
-			id = generate_id(rel_path)
-			if id in ids:
+			keyname = generate_id(rel_path)
+			#keyname = keyname.replace(base_keyname, "").lstrip(":")
+			if keyname in ids:
 				continue
 			file = Path(realpath)
 			file_stat = file.stat()
@@ -49,7 +57,7 @@ def sync_outputs(project):
 			#exist = redis_client.json().get(base_key, '.id == "{}"'.format(id))
 			#exist = redis_client.json().get(base_key, '$..id')
 			_obj = {
-				'id': id,
+				'id': keyname,
 				'name': filename,
 				'path': rel_path,
 				'type': 'file',
@@ -62,10 +70,12 @@ def sync_outputs(project):
 			
 		for dir in dirs:
 			realpath = os.path.join(root_path, dir)
-			rel_path = os.path.relpath(realpath, workdir)
+			rel_path =  os.path.relpath(realpath, workdir) + "/"
 			#print('dir.rel_path' , rel_path)
-			id = generate_id(rel_path)
-			if id in ids:
+			keyname = generate_id(rel_path)
+			#keyname = id #base_key + f":{id}"
+			#keyname = keyname.replace(base_keyname, "").lstrip(":")
+			if keyname in ids:
 				continue
 			file = Path(realpath)
 			file_stat = file.stat()
@@ -75,7 +85,7 @@ def sync_outputs(project):
 			#exist = redis_client.json().get(base_key, '.id == "{}"'.format(id))
 			
 			_obj = {
-				'id': id,
+				'id': keyname,
 				'name': dir,
 				'path': rel_path,
 				'type': 'dir',

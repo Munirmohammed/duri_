@@ -1,5 +1,7 @@
 import os
 import json
+import base64
+import pathlib
 from datetime import datetime
 from urllib.parse import urlparse
 from pydantic import Json
@@ -19,7 +21,7 @@ from src.util.migrate_projects import sync_outputs
 
 router = APIRouter()
 
-''' @router.post("/project/{id}/outputs")
+@router.post("/project/{id}/outputs")
 def test_project_outputs(
 	id: str = Path(..., description="the project id"),
 	#auth_user: schema.UserProfile = Depends(deps.user_from_header),
@@ -28,9 +30,19 @@ def test_project_outputs(
 	"""
 	migrate project outputs
 	"""
+	results = {}
 	crud_project = crud.Project(tables.Project, db)
 	projects = crud_project.get_multi()
-	results = {}
+	
+	project = crud_project.get(id)
+	project_id = project.id
+	try:
+		proj = ProjectModel.get(project_id)
+		print(proj.workdir)
+		results[project_id] = sync_outputs(proj)
+	except Exception:
+		pass
+	return results
 	for project in projects:
 		project_id = project.id
 		try:
@@ -39,7 +51,7 @@ def test_project_outputs(
 			results[project_id] = sync_outputs(proj)
 		except Exception:
 			pass
-	return results '''
+	return results
 
 @router.get("/project", response_model=List[project_schema.ProjectMini])
 def list_projects(
@@ -216,17 +228,92 @@ def list_project_outputs(
 	if not project:
 		raise HTTPException(status_code=500, detail="project not exist")
 	project_id = project.id
-	project_key  = f'outputs:{project_id}:'
 	results = []
 	try:
 		output_key  = f'outputs:{project_id}:'
 		redis_client = RedisClient().client
-		results = redis_client.json().get(output_key, '$')
-		results = [e for sublist in results for e in sublist]
+		results = redis_client.json().get(output_key, '$.*')
+		print(results)
+		#results = [e for sublist in results for e in sublist]
 	except Exception:
 		pass
-	#crud_project.remove(project_id) ## for testing
 	return results
+
+@router.get(
+	"/project/{id}/output/{file_path:path}", 
+	response_model=Union[List[project_schema.OutputFile], project_schema.FileContent]
+)
+def get_project_outputs(
+	auth_user: schema.UserProfile = Depends(deps.user_from_header),
+	id: str = Path(..., description="the project id"),
+	file_path: str = Path(..., description="the file id"),
+	db: Session = Depends(deps.get_db),
+):
+	"""
+	get project outputs 
+	"""
+	workspace_id = auth_user.workspace.id
+	crud_project = crud.Project(tables.Project, db)
+	project = crud_project.get(id)
+	if not project:
+		raise HTTPException(status_code=500, detail="project not exist")
+	project_id = project.id
+	redis_client = RedisClient().client
+	output_key  = f'outputs:{project_id}:'
+	file_paths = file_path.split("/")
+	#print(len(file_paths))
+	def get_file(key, file_id):
+		#print(file_id)
+		try:
+			json_path = f'.[?(@.id == "{file_id}")]'
+			result = redis_client.json().get(key, json_path)
+			filepath = result['path']
+			proj = ProjectModel.get(project_id)
+			#print(proj.workdir)
+			workdir = proj.workdir + "/outputs"
+			real_path = os.path.join(workdir, filepath)
+			file = pathlib.Path(real_path)
+			content = file.read_text()
+			b4_content = base64.b64encode(content.encode('utf-8')).decode('utf-8')
+			return {
+				"id": file_id,
+				"path": filepath,
+				"content": b4_content,
+			}
+		except Exception as e:
+			print(e)
+			return None
+	def get_dir(key):
+		try:
+			results = redis_client.json().get(key, '$.*')
+			#print(results)
+			return results
+		except Exception:
+			return None
+	if len(file_paths) == 1:
+		## root paths
+		file_id = utils.generate_id(file_path)
+		result = get_file(output_key, file_id)
+		return result
+	else:
+		#print('nestd path', file_path)
+		if file_path.endswith('/'):
+			path_id = utils.generate_id(file_path)
+			#print('path_id', path_id)
+			output_key = output_key + path_id
+			result = get_dir(output_key)
+		else:
+			#file_path = "/" + file_paths[-1]
+			#print(file_path)
+			parent_path = "/".join(file_paths[:-1] + [""])
+			print(parent_path)
+			file_id = utils.generate_id(file_path)
+			print("file_id", file_id)
+			path_id = utils.generate_id(parent_path)
+			print("path_id", path_id)
+			output_key = output_key + path_id
+			result = get_file(output_key, file_id)
+		return result
 
 @router.post("/project/{id}/stop", response_model=project_schema.Project)
 def stop_project(
