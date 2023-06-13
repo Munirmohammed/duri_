@@ -21,7 +21,7 @@ from src.util.migrate_projects import sync_outputs
 
 router = APIRouter()
 
-@router.post("/project/{id}/outputs")
+''' @router.post("/project/{id}/outputs")
 def test_project_outputs(
 	id: str = Path(..., description="the project id"),
 	#auth_user: schema.UserProfile = Depends(deps.user_from_header),
@@ -34,15 +34,15 @@ def test_project_outputs(
 	crud_project = crud.Project(tables.Project, db)
 	projects = crud_project.get_multi()
 	
-	project = crud_project.get(id)
-	project_id = project.id
-	try:
-		proj = ProjectModel.get(project_id)
-		print(proj.workdir)
-		results[project_id] = sync_outputs(proj)
-	except Exception:
-		pass
-	return results
+	#project = crud_project.get(id)
+	#project_id = project.id
+	#try:
+	#	proj = ProjectModel.get(project_id)
+	#	print(proj.workdir)
+	#	results[project_id] = sync_outputs(proj)
+	#except Exception:
+	#	pass
+	#return results
 	for project in projects:
 		project_id = project.id
 		try:
@@ -51,7 +51,7 @@ def test_project_outputs(
 			results[project_id] = sync_outputs(proj)
 		except Exception:
 			pass
-	return results
+	return results '''
 
 @router.get("/project", response_model=List[project_schema.ProjectMini])
 def list_projects(
@@ -246,7 +246,7 @@ def list_project_outputs(
 def get_project_outputs(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the project id"),
-	file_path: str = Path(..., description="the file id"),
+	file_path: str = Path(..., description="the file path"),
 	db: Session = Depends(deps.get_db),
 ):
 	"""
@@ -306,11 +306,11 @@ def get_project_outputs(
 			#file_path = "/" + file_paths[-1]
 			#print(file_path)
 			parent_path = "/".join(file_paths[:-1] + [""])
-			print(parent_path)
+			#print(parent_path)
 			file_id = utils.generate_id(file_path)
-			print("file_id", file_id)
+			#print("file_id", file_id)
 			path_id = utils.generate_id(parent_path)
-			print("path_id", path_id)
+			#print("path_id", path_id)
 			output_key = output_key + path_id
 			result = get_file(output_key, file_id)
 		return result
