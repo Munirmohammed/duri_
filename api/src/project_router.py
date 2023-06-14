@@ -367,9 +367,9 @@ def get_activity(
 	redis_client = RedisClient()
 	project_index_key = f"doc:{project_id}:index:activity"
 	#agent_index_key = f"doc:{project_id}:{role_name}:index:activity"
-	keys = redis_client.get_set_keys(project_index_key)
+	keys = redis_client.get_set_keys(project_index_key, withscores=True)
 	docs = []
-	for k in keys:
+	for k, score in keys:
 		role = k.replace(f"doc:{project_id}:", "").split(":")[0]
 		print(role)
 		data = redis_client.get_hash(k)
@@ -383,6 +383,7 @@ def get_activity(
 		if not isinstance(message_data, dict):
 			continue
 		message_data['role'] = role
+		message_data['date'] = datetime.fromtimestamp(score)
 		""" r = {
 			'role': role,
 			'content': message_data
