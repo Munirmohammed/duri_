@@ -14,9 +14,8 @@ from .core.config import settings
 from .schema import research as research_schema
 from src.services import Biogpt, RedisClient
 from src import utils
-from src.schema.redis import ProjectModel
+from src.schema.redis import ResearchModel
 from src.util.migrate_projects import sync_outputs
-#from src.services.redis import ProjectModel
 #from redis_om import NotFoundError
 
 router = APIRouter()
@@ -220,14 +219,18 @@ def get_research_activity(
 	research = crud_research.get(id)
 	if not research:
 		raise HTTPException(status_code=404, detail="research not exist")
-	
+	research_id = research.id
+	research_obj = ResearchModel.get(research_id)
+	if not research_obj.agents or len(research_obj.agents) == 0 :
+		raise HTTPException(status_code=500, detail="research not fully initialized retry after 10 seconds")
+	agent = research_obj.agents[0]
 	redis_client = RedisClient()
-	project_index_key = f"doc:{project_id}:index:activity"
+	project_index_key = f"doc:{research_id}:index:activity"
 	#agent_index_key = f"doc:{project_id}:{role_name}:index:activity"
 	keys = redis_client.get_set_keys(project_index_key)
 	docs = []
 	for k in keys:
-		role = k.replace(f"doc:{project_id}:", "").split(":")[0]
+		role = k.replace(f"doc:{research_id}:", "").split(":")[0]
 		print(role)
 		data = redis_client.get_hash(k)
 		content = data['content']
