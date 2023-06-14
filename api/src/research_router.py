@@ -156,7 +156,7 @@ def stop_research(
 	db.commit()
 	return research
 
-@router.post("/research/{id}/restart", response_model=research_schema.Research)
+'''@router.post("/research/{id}/restart", response_model=research_schema.Research)
 def restart_research(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the research id"),
@@ -189,4 +189,46 @@ def restart_research(
 		'container_id': container_id
 	}
 	db.commit()
-	return research
+	return research '''
+
+@router.get("/research/{id}/activity")
+def get_research_activity(
+	auth_user: schema.UserProfile = Depends(deps.user_from_header),
+	id: str = Path(..., description="the research id"),
+	db: Session = Depends(deps.get_db),
+):
+	"""
+	Get research activity
+	"""
+	workspace_id = auth_user.workspace.id
+	project_id = auth_user.project.id
+	crud_research = crud.Research(tables.Research, db)
+	research = crud_research.get(id)
+	if not research:
+		raise HTTPException(status_code=404, detail="research not exist")
+	
+	redis_client = RedisClient()
+	project_index_key = f"doc:{project_id}:index:activity"
+	#agent_index_key = f"doc:{project_id}:{role_name}:index:activity"
+	keys = redis_client.get_set_keys(project_index_key)
+	docs = []
+	for k in keys:
+		role = k.replace(f"doc:{project_id}:", "").split(":")[0]
+		print(role)
+		data = redis_client.get_hash(k)
+		content = data['content']
+		message = utils.parse_agent_doc(content)
+		#print(type(message))
+		if not isinstance(message, dict):
+			continue
+		message_type = message['type']
+		message_data = message['data']
+		if not isinstance(message_data, dict):
+			continue
+		message_data['role'] = role
+		""" r = {
+			'role': role,
+			'content': message_data
+		} """
+		docs.append(message_data)
+	return docs

@@ -63,8 +63,9 @@ class Biogpt():
 				research.workdir = self.set_workdir()
 				research.save()
 			#print(project)
-			research.name = research.name.strip().replace("\\n", "").replace('\"', "").strip(string.punctuation).strip()
-			research.save()
+			if research.name:
+				research.name = research.name.strip().replace("\\n", "").replace('\"', "").strip(string.punctuation).strip()
+				research.save()
 			self.research = research
 			return research
 		except NotFoundError:
@@ -73,7 +74,7 @@ class Biogpt():
 	def init(self, objective, name:str=None) -> ProjectModel:
 		""" get or starts an ai project. returns a unique id of that project objective provided """
 		project = self.get_project(objective)
-		if project and project.name:
+		if project and project.name and project.name != 'None':
 			return project
 		self.workdir = self.set_workdir()
 		cmds = [ "init", "-o", objective]
@@ -121,7 +122,7 @@ class Biogpt():
 		self.research = research
 		return research
 
-	def run_research(self, objective, max_count=50) -> dict:
+	def run_research(self, project_id:str, objective, max_count=50) -> dict:
 		research = self.get_research(objective)
 		if not research:
 			raise ValueError('research not found')
