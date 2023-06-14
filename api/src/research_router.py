@@ -54,6 +54,7 @@ def create_research(
 	biogpt = Biogpt()
 	research_model = biogpt.init_research(project_id, objective, name)
 	research_id = research_model.pk
+	name = research_model.name
 	workdir = research_model.workdir
 	goals = research_model.goals
 	research = crud_research.get(research_id)

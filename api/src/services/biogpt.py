@@ -86,7 +86,7 @@ class Biogpt():
 			project = self.get_project(objective)
 			if project and project.assistants:
 				break
-		#project = self.get_project(objective)	
+		project = self.get_project(objective)	
 		#print(project)
 		if name:
 			project.name = name
@@ -104,7 +104,9 @@ class Biogpt():
 	
 	def init_research(self, project_id:str, objective, name:str=None) -> ResearchModel:
 		""" get or starts an ai research. returns the research object """
-		
+		research = self.get_research(objective)
+		if research and research.name:
+			return research
 		self.workdir = self.set_workdir()
 		cmds = [ "research", "-p", str(project_id),  "-o", objective]
 		if name:
@@ -115,6 +117,7 @@ class Biogpt():
 			research = self.get_research(objective)
 			if research and research.goals:
 				break
+		research = self.get_research(objective)	
 		self.research = research
 		return research
 
