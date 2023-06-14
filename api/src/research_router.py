@@ -129,7 +129,7 @@ def run_research(
 	db.commit()
 	return research
 
-@router.post("/project/{id}/stop", response_model=research_schema.Research)
+@router.post("/research/{id}/stop", response_model=research_schema.Research)
 def stop_research(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the research id"),
@@ -156,7 +156,7 @@ def stop_research(
 	db.commit()
 	return research
 
-@router.post("/project/{id}/restart", response_model=research_schema.Research)
+@router.post("/research/{id}/restart", response_model=research_schema.Research)
 def restart_research(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the research id"),
