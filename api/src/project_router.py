@@ -147,6 +147,7 @@ def get_project(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the project id"),
 	db: Session = Depends(deps.get_db),
+	background_tasks: BackgroundTasks
 ):
 	"""
 	get a project
@@ -156,6 +157,10 @@ def get_project(
 	project = crud_project.get(id)
 	if not project:
 		raise HTTPException(status_code=404, detail="project not exist")
+	project_id = project.id
+	proj = ProjectModel.get(project_id)
+	if proj.workdir:
+		background_tasks.add_task(sync_outputs, proj)
 	return project
 
 @router.post("/project/{id}/run", response_model=project_schema.Project)

@@ -105,6 +105,9 @@ def get_research(
 				research.status = 'paused'
 				research.meta = None
 		db.commit()
+	research_obj = ResearchModel.get(id)
+	if research_obj.workdir:
+		background_tasks.add_task(sync_outputs, research_obj)
 	return research
 
 @router.post("/research/{id}/run", response_model=research_schema.Research)
