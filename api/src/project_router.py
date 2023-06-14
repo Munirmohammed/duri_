@@ -144,10 +144,10 @@ def create_project(
 
 @router.get("/project/{id}", response_model=project_schema.Project)
 def get_project(
+	background_tasks: BackgroundTasks,
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the project id"),
 	db: Session = Depends(deps.get_db),
-	background_tasks: BackgroundTasks
 ):
 	"""
 	get a project

@@ -79,6 +79,7 @@ def create_research(
 
 @router.get("/research/{id}", response_model=research_schema.Research)
 def get_research(
+	background_tasks: BackgroundTasks,
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the research id"),
 	db: Session = Depends(deps.get_db),
