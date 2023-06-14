@@ -91,6 +91,20 @@ def get_research(
 	research = crud_research.get(id)
 	if not research:
 		raise HTTPException(status_code=404, detail="research not exist")
+	if research.meta and research.meta.get('container_id', None):
+		container_id = research.meta.get('container_id', None)
+		print('container_id', container_id)
+		container = utils.get_container(container_id)
+		if container:
+			running = utils.check_container_status(container_id)
+			research.status = 'running' if running else 'paused'
+			if not running:
+				research.meta = None
+		else:
+			if research.status != 'pending':
+				research.status = 'paused'
+				research.meta = None
+		db.commit()
 	return research
 
 @router.post("/research/{id}/run", response_model=research_schema.Research)
