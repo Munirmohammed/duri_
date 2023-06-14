@@ -195,3 +195,18 @@ class Agent(Base):
 	collaborators = Column(JSON, nullable=False)
 	created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
 	updated_at = Column(DateTime(timezone=True), nullable=True)
+
+class Research(Base):
+	__tablename__ = 'research'
+	id = Column(String, primary_key=True, unique=True, nullable=False)
+	name = Column(String, nullable=False)
+	workspace_id = Column(UUID(as_uuid=True), ForeignKey('workspace.id'), nullable=False)
+	project_id = Column(String, ForeignKey('project.id'), nullable=False)
+	creator_id = Column(String, nullable=False)
+	objective = Column(TEXT, nullable=False)
+	status = Column(String, nullable=True, default='pending') # pending | running | finished
+	workdir = Column(String, nullable=False)
+	meta = Column(JSON, nullable=False)
+	goals = Column(JSON, nullable=False)
+	created_at = Column(DateTime(timezone=True), nullable=True, default=datetime.utcnow)
+	updated_at = Column(DateTime(timezone=True), nullable=True)

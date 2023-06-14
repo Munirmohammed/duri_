@@ -12,6 +12,7 @@ from .user_router import router as user_router
 from .notification_router import router as notification_router
 from .resource_router import router as resource_router
 from .project_router import router as project_router
+from .research_router import router as research_router
 import asyncio
 import aio_pika
 from .events import consume
@@ -60,6 +61,7 @@ app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(workspace_router)
 app.include_router(project_router, tags=["projects"])
+app.include_router(research_router, tags=["research"])
 app.include_router(notification_router)
 app.include_router(resource_router, tags=["resources"])
 

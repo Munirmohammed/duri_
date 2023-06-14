@@ -119,3 +119,19 @@ class Project(CRUDBase):
 
 class Agent(CRUDBase):
 	pass
+
+class Research(CRUDBase):
+	def filter_by(self, workspace_id: str = None, project_id: str = None, skip: int = 0, limit: int = 50) -> Optional[List]:
+		db = self.db
+		db_model = self.model
+		query = db.query(db_model)
+		if workspace_id:
+			query = query.filter(db_model.workspace_id == workspace_id)
+		if project_id:
+			query = query.filter(db_model.project_id == project_id)
+			
+		if limit == 1:
+			return query.first()
+		else:
+			query = query.order_by(db_model.created_at.asc()).offset(skip)
+			return query.limit(limit).all()

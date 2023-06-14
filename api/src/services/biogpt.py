@@ -6,7 +6,7 @@ import time
 from redis_om import NotFoundError
 from src.utils import wait_for_container
 from src.core.config import settings
-from src.schema.redis import ProjectModel
+from src.schema.redis import ProjectModel, ResearchModel
 
 class Biogpt():
 	image_name: str = settings.biogpt_image
@@ -48,6 +48,27 @@ class Biogpt():
 		except Exception:
 			#print(e)
 			return None
+	
+	def get_research(self, objective) -> dict:
+		""" get a research obj from redis  """
+		objective = objective.strip()
+		try:
+			research = ResearchModel.find(ResearchModel.objective == objective).first()
+			if not research:
+				return None
+			print('research.workdir: ', research.workdir)
+			if research.workdir:
+				self.workdir = research.workdir
+			else:
+				research.workdir = self.set_workdir()
+				research.save()
+			#print(project)
+			research.name = research.name.strip().replace("\\n", "").replace('\"', "").strip(string.punctuation).strip()
+			research.save()
+			self.research = research
+			return research
+		except NotFoundError:
+			return None
 
 	def init(self, objective, name:str=None) -> ProjectModel:
 		""" get or starts an ai project. returns a unique id of that project objective provided """
@@ -63,16 +84,16 @@ class Biogpt():
 		while True:
 			time.sleep(1)
 			project = self.get_project(objective)
-			if project:
+			if project and project.assistants:
 				break
-		project = self.get_project(objective)	
+		#project = self.get_project(objective)	
 		#print(project)
 		if name:
 			project.name = name
 			project.save()
 		self.project = project
 		return project
-
+	
 	def run(self, objective, max_count=50) -> dict:
 		project = self.get_project(objective)
 		if not project:
@@ -81,7 +102,31 @@ class Biogpt():
 		container = self.call(cmds, wait=False, auto_remove=True)
 		return container
 	
-	def call(self, cmd, wait=False, auto_remove=True) -> dict:
+	def init_research(self, project_id:str, objective, name:str=None) -> ResearchModel:
+		""" get or starts an ai research. returns the research object """
+		
+		self.workdir = self.set_workdir()
+		cmds = [ "research", "-p", str(project_id),  "-o", objective]
+		if name:
+			cmds = cmds + ["-n", name]
+		container = self.call(cmds, wait=True)
+		while True:
+			time.sleep(1)
+			research = self.get_research(objective)
+			if research and research.goals:
+				break
+		self.research = research
+		return research
+
+	def run_research(self, objective, max_count=50) -> dict:
+		research = self.get_research(objective)
+		if not research:
+			raise ValueError('research not found')
+		cmds = [ "research", "-p", str(project_id), "-r", "-o", objective, '-c', str(max_count)]
+		container = self.call(cmds, wait=False, auto_remove=True)
+		return container
+	
+	def call(self, cmd, wait=False, auto_remove=True, app_dir: str = "/app/outputs") -> dict:
 		client = docker.from_env()
 		assert self.workdir
 		workdir = self.workdir
@@ -95,7 +140,7 @@ class Biogpt():
 			network=self.network_name,
 			volumes={
 				f'{workdir}/outputs': {
-					"bind": '/app/outputs',
+					"bind": app_dir,
 					"mode": "rw"
 				}
 			},
