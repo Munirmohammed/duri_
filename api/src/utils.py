@@ -24,6 +24,14 @@ def wait_for_container(container):
 		container.reload()
 	return container.status
 
+def get_container(container_id):
+	client = docker.from_env()
+	try:
+		container = client.containers.get(container_id)
+		return container
+	except docker.errors.NotFound:
+		return False
+	
 def check_container_status(container_id):
 	client = docker.from_env()
 	try:
@@ -34,6 +42,16 @@ def check_container_status(container_id):
 			return False
 	except docker.errors.NotFound:
 		return False
+	
+def stop_container(container_id):
+	client = docker.from_env()
+	try:
+		container = client.containers.get(container_id)
+		if container.status == 'running':
+			container.stop()
+		return
+	except docker.errors.NotFound:
+		return
 
 class Dict2Obj(object):
 	"""

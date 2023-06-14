@@ -44,6 +44,7 @@ def create_research(
 	"""
 	create a research
 	"""
+	objective = objective.strip()
 	user_id = auth_user.id
 	workspace_id = auth_user.workspace.id
 	project_id = auth_user.project.id
@@ -116,6 +117,68 @@ def run_research(
 		container_id = research.meta.get('container_id', None)
 		if utils.check_container_status(container_id):
 			raise HTTPException(status_code=500, detail="research already running")
+	max_count = 5
+	biogpt = Biogpt()
+	container = biogpt.run_research(project_id, objective, max_count)
+	#print(container)
+	research.status = 'running' ## container.status.lower()
+	container_id = str(container.id)[:12]
+	research.meta = {
+		'container_id': container_id
+	}
+	db.commit()
+	return research
+
+@router.post("/project/{id}/stop", response_model=research_schema.Research)
+def stop_research(
+	auth_user: schema.UserProfile = Depends(deps.user_from_header),
+	id: str = Path(..., description="the research id"),
+	db: Session = Depends(deps.get_db),
+):
+	"""
+	stop a research
+	"""
+	workspace_id = auth_user.workspace.id
+	crud_research = crud.Research(tables.Research, db)
+	research = crud_research.get(id)
+	if not research:
+		raise HTTPException(status_code=404, detail="research not exist")
+	if not (research.meta and research.meta.get('container_id', None)):
+		research.status = 'paused'
+		research.meta = None
+		db.commit()
+		raise HTTPException(status_code=404, detail="research not running")
+	container_id = research.meta.get('container_id', None)
+	if container_id and utils.check_container_status(container_id):
+		utils.stop_container(container_id)
+	research.status = 'paused'
+	research.meta = None
+	db.commit()
+	return research
+
+@router.post("/project/{id}/restart", response_model=research_schema.Research)
+def restart_research(
+	auth_user: schema.UserProfile = Depends(deps.user_from_header),
+	id: str = Path(..., description="the research id"),
+	db: Session = Depends(deps.get_db),
+):
+	"""
+	restart a research
+	"""
+	workspace_id = auth_user.workspace.id
+	project_id = auth_user.project.id
+	crud_research = crud.Research(tables.Research, db)
+	research = crud_research.get(id)
+	if not research:
+		raise HTTPException(status_code=404, detail="research not exist")
+	if research.meta and research.meta.get('container_id', None):
+		container_id = research.meta.get('container_id', None)
+		container = utils.get_container(container_id)
+		if container and utils.check_container_status(container_id):
+				research.status = 'running'
+				db.commit()
+				return research
+	objective = research.objective
 	max_count = 5
 	biogpt = Biogpt()
 	container = biogpt.run_research(project_id, objective, max_count)
