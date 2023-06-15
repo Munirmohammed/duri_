@@ -107,8 +107,13 @@ def get_research(
 				research.meta = None
 		db.commit()
 	research_obj = ResearchModel.get(id)
+	research_obj.status = research.status
+	research.name = research_obj.name
 	if research_obj.workdir:
+		research.workdir = research_obj.workdir
 		background_tasks.add_task(sync_outputs, research_obj)
+	db.commit()
+	research_obj.save()
 	return research
 
 @router.post("/research/{id}/run", response_model=research_schema.Research)
@@ -252,7 +257,9 @@ def get_research_activity(
 		docs.append(message_data)
 	return docs
 
-@router.get("/research/{id}/output", response_model=List[project_schema.OutputFile])
+@router.get("/research/{id}/output", 
+	#response_model=List[Union[project_schema.OutputFile, None]]
+)
 def list_research_output(
 	auth_user: schema.UserProfile = Depends(deps.user_from_header),
 	id: str = Path(..., description="the research id"),
@@ -268,15 +275,17 @@ def list_research_output(
 	if not research:
 		raise HTTPException(status_code=404, detail="research not exist")
 	research_id = research.id
+	print(research.workdir)
 	results = []
 	try:
 		output_key  = f'outputs:{research_id}:'
 		redis_client = RedisClient().client
 		results = redis_client.json().get(output_key, '$.*')
 		print(results)
+		results = [project_schema.OutputFile(**r) for r in results]
 		#results = [e for sublist in results for e in sublist]
 	except Exception:
-		pass
+		results = []
 	return results
 
 @router.get(
