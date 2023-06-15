@@ -184,7 +184,7 @@ def run_project(
 		container_id = project.meta.get('container_id', None)
 		if utils.check_container_status(container_id):
 			raise HTTPException(status_code=500, detail="project already running")
-	max_count = 5
+	max_count = 500
 	biogpt = Biogpt()
 	container = biogpt.run(objective, max_count)
 	#print(container)

@@ -140,7 +140,7 @@ def run_research(
 		container_id = research.meta.get('container_id', None)
 		if utils.check_container_status(container_id):
 			raise HTTPException(status_code=500, detail="research already running")
-	max_count = 5
+	max_count = 150
 	biogpt = Biogpt()
 	container = biogpt.run_research(project_id, objective, max_count)
 	#print(container)
